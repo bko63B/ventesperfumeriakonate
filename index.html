@@ -44,8 +44,8 @@
             padding: 0;
         }
         
-        /* Login Screen */
-        .login-screen {
+        /* Security Gate Styles */
+        #securityGate {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -55,27 +55,31 @@
             padding: 20px;
         }
         
-        .login-card {
+        .security-card {
             background-color: white;
             padding: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
         }
         
-        .login-card h1 {
+        .security-card h1 {
             color: var(--primary);
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
-        .login-card p {
+        .security-card p {
             color: var(--gray);
             margin-bottom: 25px;
         }
         
-        .login-form {
+        .security-form {
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -107,7 +111,49 @@
             box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.2);
         }
         
-        .app-content {
+        #securityWarning, #securityError {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        #securityWarning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        #securityError {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Toast Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .toast-success {
+            background-color: var(--success);
+        }
+        
+        .toast-error {
+            background-color: var(--danger);
+        }
+        
+        /* Application Styles */
+        #appContainer {
             display: none;
         }
         
@@ -731,50 +777,67 @@
             border-top: 1px solid #eee;
             font-weight: bold;
         }
+        
+        .text-success { color: var(--success); }
+        .text-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+        .text-muted { color: var(--gray); }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div class="login-screen" id="login-screen">
-        <div class="login-card">
-            <h1><i class="fas fa-spa"></i> Accès Privé</h1>
-            <p>Veuillez vous identifier pour accéder à l'application</p>
+    <!-- Security Gate -->
+    <div id="securityGate">
+        <div class="security-card">
+            <h1><i class="fas fa-lock"></i> Accès Sécurisé</h1>
+            <p>Application réservée à Balla KONATE</p>
             
-            <div class="login-form">
+            <div class="security-form">
                 <div class="form-group">
-                    <label for="access-key">Clé d'accès :</label>
-                    <input type="password" id="access-key" placeholder="Entrez votre clé d'accès">
+                    <label for="accessKey">Clé d'accès :</label>
+                    <input type="password" id="accessKey" placeholder="Entrez votre clé d'accès">
                 </div>
                 
                 <div class="form-group">
-                    <label for="personal-code">Code personnel :</label>
-                    <input type="password" id="personal-code" placeholder="Entrez votre code personnel">
+                    <label for="personalCode">Code personnel :</label>
+                    <input type="password" id="personalCode" placeholder="Entrez votre code personnel">
                 </div>
                 
-                <button class="btn btn-primary btn-block" id="login-btn">
-                    <i class="fas fa-lock"></i> Se connecter
+                <button class="btn btn-primary btn-block" id="accessBtn">
+                    <i class="fas fa-key"></i> Accéder à l'application
                 </button>
                 
-                <div id="login-error" class="alert alert-error" style="display: none;">
+                <div id="securityWarning" class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div id="warningText"></div>
+                </div>
+                
+                <div id="securityError" class="alert alert-error">
                     <i class="fas fa-exclamation-circle"></i>
-                    <div>Clé d'accès ou code personnel incorrect</div>
+                    <div>Identifiants incorrects. Veuillez réessayer.</div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
     
-    <!-- Application Content -->
-    <div class="app-content" id="app-content">
+    <!-- Application Container -->
+    <div id="appContainer" class="container">
         <header>
             <div class="header-content">
                 <div class="logo">
                     <i class="fas fa-spa"></i>
                     <h1>Parfums & Cosmétiques</h1>
                 </div>
+                <div class="date-selector">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="sale-date">
+                </div>
                 <div class="user-info">
                     <span>Balla KONATE</span>
-                    <button class="logout-btn" id="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    <button class="logout-btn" id="lockBtn">
+                        <i class="fas fa-lock"></i> Verrouiller
                     </button>
                 </div>
             </div>
@@ -1028,6 +1091,236 @@
     </div>
 
     <script>
+        // =============================================
+        // CONFIGURATION DE SÉCURITÉ POUR BALLA KONATE
+        // =============================================
+        
+        // MODIFIEZ CES VALEURS PAR BALLA KONATE
+        const SECURITY_CONFIG = {
+            // Clé d'accès principale - Changez cette valeur
+            accessKey: "BallaKonate2024!",
+            
+            // Code personnel - Changez cette valeur (6 chiffres)
+            personalCode: "010189",
+            
+            // Nombre maximum de tentatives avant verrouillage
+            maxAttempts: 5,
+            
+            // Durée de verrouillage en minutes après échecs
+            lockoutDuration: 30,
+            
+            // Durée de session en heures
+            sessionDuration: 8
+        };
+        
+        // =============================================
+        // SYSTÈME DE SÉCURITÉ
+        // =============================================
+        
+        let security = {
+            failedAttempts: 0,
+            isLocked: false,
+            lockUntil: 0,
+            
+            init() {
+                // Charger l'état de sécurité depuis le stockage local
+                this.loadSecurityState();
+                
+                // Vérifier si l'application est verrouillée
+                if (this.isLocked && Date.now() < this.lockUntil) {
+                    this.showLockout();
+                    return;
+                } else if (this.isLocked) {
+                    // Déverrouiller si la période est écoulée
+                    this.resetSecurity();
+                }
+                
+                // Vérifier si une session est active
+                if (this.isAuthenticated()) {
+                    this.grantAccess();
+                } else {
+                    this.showSecurityGate();
+                }
+                
+                // Configurer les écouteurs d'événements
+                this.setupEventListeners();
+            },
+            
+            loadSecurityState() {
+                this.failedAttempts = parseInt(localStorage.getItem('failedAttempts')) || 0;
+                this.isLocked = localStorage.getItem('isLocked') === 'true';
+                this.lockUntil = parseInt(localStorage.getItem('lockUntil')) || 0;
+            },
+            
+            saveSecurityState() {
+                localStorage.setItem('failedAttempts', this.failedAttempts.toString());
+                localStorage.setItem('isLocked', this.isLocked.toString());
+                localStorage.setItem('lockUntil', this.lockUntil.toString());
+            },
+            
+            isAuthenticated() {
+                const authExpiry = parseInt(localStorage.getItem('authExpiry')) || 0;
+                return localStorage.getItem('authenticated') === 'true' && Date.now() < authExpiry;
+            },
+            
+            showSecurityGate() {
+                document.getElementById('securityGate').style.display = 'flex';
+                document.getElementById('appContainer').style.display = 'none';
+                document.getElementById('accessKey').focus();
+                this.updateSecurityWarning();
+            },
+            
+            showLockout() {
+                const warningElement = document.getElementById('securityWarning');
+                const remainingTime = Math.ceil((this.lockUntil - Date.now()) / 60000);
+                document.getElementById('warningText').textContent = 
+                    `🔒 Accès temporairement bloqué. Réessayez dans ${remainingTime} minute(s).`;
+                warningElement.style.display = 'block';
+                document.getElementById('accessBtn').disabled = true;
+                
+                // Déverrouiller automatiquement après la période
+                setTimeout(() => {
+                    this.resetSecurity();
+                    this.init();
+                }, this.lockUntil - Date.now());
+            },
+            
+            updateSecurityWarning() {
+                const warningElement = document.getElementById('securityWarning');
+                if (this.failedAttempts > 0) {
+                    const remainingAttempts = SECURITY_CONFIG.maxAttempts - this.failedAttempts;
+                    document.getElementById('warningText').textContent = 
+                        `${this.failedAttempts} tentative(s) échouée(s). ${remainingAttempts} tentative(s) restante(s).`;
+                    warningElement.style.display = 'block';
+                } else {
+                    warningElement.style.display = 'none';
+                }
+            },
+            
+            attemptAccess() {
+                const accessKey = document.getElementById('accessKey').value;
+                const personalCode = document.getElementById('personalCode').value;
+                const errorElement = document.getElementById('securityError');
+                
+                // Réinitialiser les messages d'erreur
+                errorElement.style.display = 'none';
+                
+                // Vérifier les identifiants
+                if (accessKey === SECURITY_CONFIG.accessKey && personalCode === SECURITY_CONFIG.personalCode) {
+                    // Authentification réussie
+                    this.grantAccess();
+                    this.resetSecurity();
+                    this.showToast('Authentification réussie. Bienvenue Balla!', 'success');
+                } else {
+                    // Authentification échouée
+                    this.failedAttempts++;
+                    this.saveSecurityState();
+                    
+                    if (this.failedAttempts >= SECURITY_CONFIG.maxAttempts) {
+                        this.lockAccess();
+                    } else {
+                        errorElement.style.display = 'block';
+                        this.updateSecurityWarning();
+                        this.clearInputs();
+                    }
+                }
+            },
+            
+            lockAccess() {
+                this.isLocked = true;
+                this.lockUntil = Date.now() + (SECURITY_CONFIG.lockoutDuration * 60 * 1000);
+                this.saveSecurityState();
+                this.showLockout();
+            },
+            
+            resetSecurity() {
+                this.failedAttempts = 0;
+                this.isLocked = false;
+                this.lockUntil = 0;
+                this.saveSecurityState();
+            },
+            
+            grantAccess() {
+                document.getElementById('securityGate').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                
+                // Définir l'expiration de la session
+                const sessionExpiry = Date.now() + (SECURITY_CONFIG.sessionDuration * 60 * 60 * 1000);
+                localStorage.setItem('authenticated', 'true');
+                localStorage.setItem('authExpiry', sessionExpiry.toString());
+                
+                // Démarrer la surveillance d'inactivité
+                this.startInactivityMonitor();
+                
+                // Initialiser l'application
+                app.init();
+            },
+            
+            lockApp() {
+                localStorage.removeItem('authenticated');
+                localStorage.removeItem('authExpiry');
+                this.showSecurityGate();
+                this.showToast('Application verrouillée', 'success');
+            },
+            
+            startInactivityMonitor() {
+                let inactivityTimer;
+                
+                const resetTimer = () => {
+                    clearTimeout(inactivityTimer);
+                    // Verrouiller après 30 minutes d'inactivité
+                    inactivityTimer = setTimeout(() => {
+                        this.lockApp();
+                    }, 30 * 60 * 1000);
+                };
+                
+                // Réinitialiser le timer sur les événements utilisateur
+                document.addEventListener('mousemove', resetTimer);
+                document.addEventListener('keypress', resetTimer);
+                document.addEventListener('click', resetTimer);
+                
+                resetTimer();
+            },
+            
+            clearInputs() {
+                document.getElementById('accessKey').value = '';
+                document.getElementById('personalCode').value = '';
+                document.getElementById('accessKey').focus();
+            },
+            
+            setupEventListeners() {
+                document.getElementById('accessBtn').addEventListener('click', () => {
+                    this.attemptAccess();
+                });
+                
+                document.getElementById('lockBtn').addEventListener('click', () => {
+                    this.lockApp();
+                });
+                
+                // Soumission avec la touche Entrée
+                document.getElementById('personalCode').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.attemptAccess();
+                    }
+                });
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = `toast toast-${type}`;
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 4000);
+            }
+        };
+
+        // =============================================
+        // APPLICATION DE GESTION DES VENTES
+        // =============================================
+        
         // Données de l'application
         let products = [
             { id: 1, name: "Parfum Fleur de Printemps", price: 75.00, stock: 15, category: "Parfum", description: "Parfum floral printanier" },
@@ -1045,930 +1338,971 @@
         let salesHistory = [];
         let globalDiscount = 0;
         let discountType = 'global'; // 'global' or 'individual'
-        
-        // Identifiants d'accès
-        const ACCESS_KEY = "Balla2024";
-        const PERSONAL_CODE = "Konate123";
 
-        // Initialisation de l'application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser la date du jour
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('sale-date').value = today;
-            document.getElementById('history-filter').value = today;
+        let app = {
+            init() {
+                // Initialiser la date du jour
+                const today = new Date().toISOString().split('T')[0];
+                const saleDateInput = document.getElementById('sale-date');
+                if (saleDateInput) saleDateInput.value = today;
+                
+                const historyFilter = document.getElementById('history-filter');
+                if (historyFilter) historyFilter.value = today;
+                
+                // Charger les données depuis le localStorage si disponibles
+                this.loadData();
+                
+                // Afficher les produits
+                this.renderProducts();
+                this.renderStockProducts();
+                
+                // Mettre à jour les statistiques
+                this.updateStats();
+                
+                // Configurer les écouteurs d'événements
+                this.setupEventListeners();
+                
+                // Vérifier les réservations pour les alertes
+                this.checkReservationAlerts();
+            },
             
-            // Charger les données depuis le localStorage si disponibles
-            loadData();
+            loadData() {
+                const savedProducts = localStorage.getItem('perfumeProducts');
+                const savedReservations = localStorage.getItem('perfumeReservations');
+                const savedSalesHistory = localStorage.getItem('perfumeSalesHistory');
+                
+                if (savedProducts) products = JSON.parse(savedProducts);
+                if (savedReservations) reservations = JSON.parse(savedReservations);
+                if (savedSalesHistory) salesHistory = JSON.parse(savedSalesHistory);
+            },
             
-            // Afficher les produits
-            renderProducts();
-            renderStockProducts();
+            saveData() {
+                localStorage.setItem('perfumeProducts', JSON.stringify(products));
+                localStorage.setItem('perfumeReservations', JSON.stringify(reservations));
+                localStorage.setItem('perfumeSalesHistory', JSON.stringify(salesHistory));
+            },
             
-            // Mettre à jour les statistiques
-            updateStats();
+            renderProducts() {
+                const productList = document.getElementById('product-list');
+                if (!productList) return;
+                
+                productList.innerHTML = '';
+                
+                if (products.length === 0) {
+                    productList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p>Aucun produit en stock</p>
+                            <p class="text-muted">Ajoutez des produits pour commencer à vendre</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                products.forEach(product => {
+                    if (product.stock > 0) {
+                        const productItem = document.createElement('div');
+                        productItem.className = 'product-item';
+                        
+                        productItem.innerHTML = `
+                            <div class="product-info">
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-details">
+                                    <span class="product-price">${product.price.toFixed(2)} €</span>
+                                    <span class="product-stock">${product.stock} en stock</span>
+                                    <span class="product-category">${product.category}</span>
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-primary btn-small add-to-cart" data-id="${product.id}">
+                                    <i class="fas fa-cart-plus"></i> Vendre
+                                </button>
+                                <button class="btn btn-secondary btn-small reserve-product" data-id="${product.id}">
+                                    <i class="far fa-calendar-check"></i> Réserver
+                                </button>
+                            </div>
+                        `;
+                        
+                        productList.appendChild(productItem);
+                    }
+                });
+                
+                // Mettre à jour la liste des produits pour les réservations
+                this.updateReservationProductList();
+            },
             
-            // Configurer les écouteurs d'événements
-            setupEventListeners();
-            
-            // Vérifier les réservations pour les alertes
-            checkReservationAlerts();
-        });
-        
-        // Fonction pour charger les données depuis le localStorage
-        function loadData() {
-            const savedProducts = localStorage.getItem('perfumeProducts');
-            const savedReservations = localStorage.getItem('perfumeReservations');
-            const savedSalesHistory = localStorage.getItem('perfumeSalesHistory');
-            
-            if (savedProducts) products = JSON.parse(savedProducts);
-            if (savedReservations) reservations = JSON.parse(savedReservations);
-            if (savedSalesHistory) salesHistory = JSON.parse(savedSalesHistory);
-        }
-        
-        // Fonction pour sauvegarder les données dans le localStorage
-        function saveData() {
-            localStorage.setItem('perfumeProducts', JSON.stringify(products));
-            localStorage.setItem('perfumeReservations', JSON.stringify(reservations));
-            localStorage.setItem('perfumeSalesHistory', JSON.stringify(salesHistory));
-        }
-        
-        // Fonction pour afficher les produits dans l'onglet vente
-        function renderProducts() {
-            const productList = document.getElementById('product-list');
-            productList.innerHTML = '';
-            
-            if (products.length === 0) {
-                productList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-box-open"></i>
-                        <p>Aucun produit en stock</p>
-                        <p class="text-muted">Ajoutez des produits pour commencer à vendre</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            products.forEach(product => {
-                if (product.stock > 0) {
+            renderStockProducts() {
+                const stockProductList = document.getElementById('stock-product-list');
+                if (!stockProductList) return;
+                
+                stockProductList.innerHTML = '';
+                
+                if (products.length === 0) {
+                    stockProductList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-boxes"></i>
+                            <p>Aucun produit enregistré</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                products.forEach(product => {
                     const productItem = document.createElement('div');
                     productItem.className = 'product-item';
+                    
+                    const stockStatus = product.stock > 5 ? 'text-success' : (product.stock > 0 ? 'text-warning' : 'text-danger');
+                    const stockIcon = product.stock > 5 ? 'fa-check-circle' : (product.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle');
                     
                     productItem.innerHTML = `
                         <div class="product-info">
                             <div class="product-name">${product.name}</div>
                             <div class="product-details">
                                 <span class="product-price">${product.price.toFixed(2)} €</span>
-                                <span class="product-stock">${product.stock} en stock</span>
+                                <span class="product-stock ${stockStatus}">
+                                    <i class="fas ${stockIcon}"></i> ${product.stock} en stock
+                                </span>
                                 <span class="product-category">${product.category}</span>
                             </div>
+                            ${product.description ? `<div style="margin-top: 5px; font-size: 0.85rem; color: var(--gray);">${product.description}</div>` : ''}
                         </div>
                         <div class="product-actions">
-                            <button class="btn btn-primary btn-small add-to-cart" data-id="${product.id}">
-                                <i class="fas fa-cart-plus"></i> Vendre
+                            <button class="btn btn-warning btn-small edit-product" data-id="${product.id}">
+                                <i class="fas fa-edit"></i> Modifier
                             </button>
-                            <button class="btn btn-secondary btn-small reserve-product" data-id="${product.id}">
-                                <i class="far fa-calendar-check"></i> Réserver
+                            <button class="btn btn-danger btn-small delete-product" data-id="${product.id}">
+                                <i class="fas fa-trash"></i> Supprimer
                             </button>
                         </div>
                     `;
                     
-                    productList.appendChild(productItem);
-                }
-            });
-            
-            // Mettre à jour la liste des produits pour les réservations
-            updateReservationProductList();
-        }
-        
-        // Fonction pour afficher les produits dans l'onglet gestion du stock
-        function renderStockProducts() {
-            const stockProductList = document.getElementById('stock-product-list');
-            stockProductList.innerHTML = '';
-            
-            if (products.length === 0) {
-                stockProductList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-boxes"></i>
-                        <p>Aucun produit enregistré</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            products.forEach(product => {
-                const productItem = document.createElement('div');
-                productItem.className = 'product-item';
-                
-                const stockStatus = product.stock > 5 ? 'text-success' : (product.stock > 0 ? 'text-warning' : 'text-danger');
-                const stockIcon = product.stock > 5 ? 'fa-check-circle' : (product.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle');
-                
-                productItem.innerHTML = `
-                    <div class="product-info">
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-details">
-                            <span class="product-price">${product.price.toFixed(2)} €</span>
-                            <span class="product-stock ${stockStatus}">
-                                <i class="fas ${stockIcon}"></i> ${product.stock} en stock
-                            </span>
-                            <span class="product-category">${product.category}</span>
-                        </div>
-                        ${product.description ? `<div style="margin-top: 5px; font-size: 0.85rem; color: var(--gray);">${product.description}</div>` : ''}
-                    </div>
-                    <div class="product-actions">
-                        <button class="btn btn-warning btn-small edit-product" data-id="${product.id}">
-                            <i class="fas fa-edit"></i> Modifier
-                        </button>
-                        <button class="btn btn-danger btn-small delete-product" data-id="${product.id}">
-                            <i class="fas fa-trash"></i> Supprimer
-                        </button>
-                    </div>
-                `;
-                
-                stockProductList.appendChild(productItem);
-            });
-            
-            // Ajouter les écouteurs d'événements pour les boutons de modification de stock
-            document.querySelectorAll('.edit-product').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productId = parseInt(this.dataset.id);
-                    editProduct(productId);
+                    stockProductList.appendChild(productItem);
                 });
-            });
-            
-            document.querySelectorAll('.delete-product').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productId = parseInt(this.dataset.id);
-                    deleteProduct(productId);
-                });
-            });
-        }
-        
-        // Fonction pour mettre à jour la liste des produits pour les réservations
-        function updateReservationProductList() {
-            const reservationProductSelect = document.getElementById('reservation-product');
-            reservationProductSelect.innerHTML = '';
-            
-            // Option par défaut
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Sélectionnez un produit';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            reservationProductSelect.appendChild(defaultOption);
-            
-            products.forEach(product => {
-                if (product.stock > 0) {
-                    const option = document.createElement('option');
-                    option.value = product.id;
-                    option.textContent = `${product.name} (${product.stock} en stock)`;
-                    reservationProductSelect.appendChild(option);
-                }
-            });
-        }
-        
-        // Fonction pour mettre à jour les statistiques
-        function updateStats() {
-            // Ventes du jour
-            const today = new Date().toISOString().split('T')[0];
-            const dailySales = salesHistory
-                .filter(sale => sale.date === today)
-                .reduce((total, sale) => total + sale.amount, 0);
-            document.getElementById('daily-sales').textContent = `${dailySales.toFixed(2)} €`;
-            
-            // Ventes totales
-            const totalSales = salesHistory.reduce((total, sale) => total + sale.amount, 0);
-            document.getElementById('total-sales').textContent = `${totalSales.toFixed(2)} €`;
-            
-            // Produits en stock
-            const totalStock = products.reduce((total, product) => total + product.stock, 0);
-            document.getElementById('total-stock').textContent = totalStock;
-            
-            // Valeur du stock
-            const stockValue = products.reduce((total, product) => total + (product.price * product.stock), 0);
-            document.getElementById('stock-value').textContent = `${stockValue.toFixed(2)} €`;
-            document.getElementById('total-stock-value').textContent = `${stockValue.toFixed(2)} €`;
-            
-            // Réservations
-            const activeReservations = reservations.filter(r => r.status === 'active').length;
-            document.getElementById('total-reservations').textContent = activeReservations;
-            
-            // Mettre à jour l'historique des ventes
-            renderSalesHistory();
-            
-            // Mettre à jour la liste des réservations
-            renderReservations();
-        }
-        
-        // Fonction pour configurer les écouteurs d'événements
-        function setupEventListeners() {
-            // Authentification
-            document.getElementById('login-btn').addEventListener('click', function() {
-                const accessKey = document.getElementById('access-key').value;
-                const personalCode = document.getElementById('personal-code').value;
                 
-                if (accessKey === ACCESS_KEY && personalCode === PERSONAL_CODE) {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('app-content').style.display = 'block';
-                } else {
-                    document.getElementById('login-error').style.display = 'flex';
-                }
-            });
-            
-            document.getElementById('logout-btn').addEventListener('click', function() {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('app-content').style.display = 'none';
-                document.getElementById('access-key').value = '';
-                document.getElementById('personal-code').value = '';
-                document.getElementById('login-error').style.display = 'none';
-            });
-            
-            // Navigation par onglets
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Désactiver tous les onglets
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
-                    // Activer l'onglet sélectionné
-                    this.classList.add('active');
-                    document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
-                });
-            });
-            
-            // Ajouter au panier
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('add-to-cart') || e.target.closest('.add-to-cart')) {
-                    const button = e.target.classList.contains('add-to-cart') ? e.target : e.target.closest('.add-to-cart');
-                    const productId = parseInt(button.dataset.id);
-                    addToCart(productId);
-                }
-            });
-            
-            // Réserver un produit
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('reserve-product') || e.target.closest('.reserve-product')) {
-                    const button = e.target.classList.contains('reserve-product') ? e.target : e.target.closest('.reserve-product');
-                    const productId = parseInt(button.dataset.id);
-                    document.getElementById('reservation-product').value = productId;
-                    document.querySelector('.tab[data-tab="reservations"]').click();
-                }
-            });
-            
-            // Options de remise
-            document.querySelectorAll('.discount-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    document.querySelectorAll('.discount-option').forEach(o => o.classList.remove('active'));
-                    this.classList.add('active');
-                    discountType = this.dataset.type;
-                });
-            });
-            
-            // Appliquer une remise
-            document.getElementById('apply-discount').addEventListener('click', function() {
-                const discountInput = document.getElementById('global-discount');
-                const discountValue = parseFloat(discountInput.value) || 0;
-                
-                if (discountValue < 0 || discountValue > 100) {
-                    alert('La remise doit être comprise entre 0 et 100%.');
-                    return;
-                }
-                
-                if (discountType === 'global') {
-                    globalDiscount = discountValue;
-                } else if (discountType === 'individual' && cart.length > 0) {
-                    // Appliquer la remise à tous les articles du panier
-                    cart.forEach(item => {
-                        item.discount = discountValue;
-                    });
-                }
-                
-                updateCart();
-            });
-            
-            // Valider le paiement
-            document.getElementById('validate-payment').addEventListener('click', function() {
-                if (cart.length === 0) {
-                    alert('Le panier est vide. Ajoutez des produits avant de valider le paiement.');
-                    return;
-                }
-                
-                validatePayment();
-            });
-            
-            // Vider le panier
-            document.getElementById('clear-cart').addEventListener('click', function() {
-                if (cart.length === 0) {
-                    alert('Le panier est déjà vide.');
-                    return;
-                }
-                
-                if (confirm('Êtes-vous sûr de vouloir vider le panier ?')) {
-                    cart = [];
-                    globalDiscount = 0;
-                    document.getElementById('global-discount').value = '';
-                    updateCart();
-                }
-            });
-            
-            // Ajouter une réservation
-            document.getElementById('add-reservation').addEventListener('click', function() {
-                addReservation();
-            });
-            
-            // Filtrer l'historique
-            document.getElementById('history-filter').addEventListener('change', function() {
-                renderSalesHistory();
-            });
-            
-            // Gestion des produits
-            document.getElementById('add-product-btn').addEventListener('click', function() {
-                openProductModal();
-            });
-            
-            document.getElementById('product-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveProduct();
-            });
-            
-            document.getElementById('cancel-product-btn').addEventListener('click', function() {
-                document.getElementById('product-modal').style.display = 'none';
-            });
-            
-            // Fermer les modales
-            document.querySelectorAll('.close-modal').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.modal').forEach(modal => {
-                        modal.style.display = 'none';
+                // Ajouter les écouteurs d'événements pour les boutons de modification de stock
+                document.querySelectorAll('.edit-product').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = parseInt(this.dataset.id);
+                        app.editProduct(productId);
                     });
                 });
-            });
-            
-            document.getElementById('close-sale-modal').addEventListener('click', function() {
-                document.getElementById('sale-confirmation-modal').style.display = 'none';
-            });
-            
-            document.getElementById('close-reservation-modal').addEventListener('click', function() {
-                document.getElementById('reservation-alert-modal').style.display = 'none';
-            });
-            
-            // Fermer les modales en cliquant à l'extérieur
-            window.addEventListener('click', function(e) {
-                if (e.target.classList.contains('modal')) {
-                    e.target.style.display = 'none';
-                }
-            });
-        }
-        
-        // Fonction pour ajouter un produit au panier
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            
-            if (!product) return;
-            
-            if (product.stock <= 0) {
-                alert('Ce produit est en rupture de stock.');
-                return;
-            }
-            
-            const existingItem = cart.find(item => item.product.id === productId);
-            
-            if (existingItem) {
-                if (existingItem.quantity >= product.stock) {
-                    alert(`Quantité maximale disponible pour ce produit : ${product.stock}`);
-                    return;
-                }
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    product: product,
-                    quantity: 1,
-                    discount: 0
+                
+                document.querySelectorAll('.delete-product').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = parseInt(this.dataset.id);
+                        app.deleteProduct(productId);
+                    });
                 });
-            }
+            },
             
-            updateCart();
-            
-            // Feedback visuel
-            const button = document.querySelector(`.add-to-cart[data-id="${productId}"]`);
-            const originalHTML = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-check"></i> Ajouté';
-            button.style.backgroundColor = 'var(--success)';
-            
-            setTimeout(() => {
-                button.innerHTML = originalHTML;
-                button.style.backgroundColor = '';
-            }, 1000);
-        }
-        
-        // Fonction pour mettre à jour l'affichage du panier
-        function updateCart() {
-            const cartItems = document.getElementById('cart-items');
-            const cartTotal = document.getElementById('cart-total');
-            
-            if (cart.length === 0) {
-                cartItems.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>Votre panier est vide</p>
-                        <p class="text-muted">Ajoutez des produits pour commencer une vente</p>
-                    </div>
-                `;
-                cartTotal.textContent = '0.00 €';
-                return;
-            }
-            
-            cartItems.innerHTML = '';
-            
-            let subtotal = 0;
-            
-            cart.forEach((item, index) => {
-                const itemTotal = item.product.price * item.quantity * (1 - item.discount / 100);
-                subtotal += itemTotal;
+            updateReservationProductList() {
+                const reservationProductSelect = document.getElementById('reservation-product');
+                if (!reservationProductSelect) return;
                 
-                const cartItem = document.createElement('div');
-                cartItem.className = 'cart-item';
+                reservationProductSelect.innerHTML = '';
                 
-                cartItem.innerHTML = `
-                    <div class="cart-item-info">
-                        <div class="cart-item-name">${item.product.name}</div>
-                        <div class="cart-item-details">
-                            ${item.product.price.toFixed(2)} € x ${item.quantity}
-                            ${item.discount > 0 ? ` | -${item.discount}%` : ''}
-                        </div>
-                    </div>
-                    <div class="cart-item-actions">
-                        <div style="font-weight: bold; margin-bottom: 5px;">${itemTotal.toFixed(2)} €</div>
-                        <div>
-                            <button class="btn btn-primary btn-small edit-item" data-index="${index}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-small remove-item" data-index="${index}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
+                // Option par défaut
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Sélectionnez un produit';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                reservationProductSelect.appendChild(defaultOption);
                 
-                cartItems.appendChild(cartItem);
-            });
-            
-            // Appliquer la remise globale
-            const totalAfterDiscount = subtotal * (1 - globalDiscount / 100);
-            cartTotal.textContent = `${totalAfterDiscount.toFixed(2)} €`;
-            
-            // Ajouter les écouteurs d'événements pour les boutons du panier
-            document.querySelectorAll('.remove-item').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = parseInt(this.dataset.index);
-                    cart.splice(index, 1);
-                    updateCart();
+                products.forEach(product => {
+                    if (product.stock > 0) {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = `${product.name} (${product.stock} en stock)`;
+                        reservationProductSelect.appendChild(option);
+                    }
                 });
-            });
+            },
             
-            document.querySelectorAll('.edit-item').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = parseInt(this.dataset.index);
-                    editCartItem(index);
-                });
-            });
-        }
-        
-        // Fonction pour modifier un article du panier
-        function editCartItem(index) {
-            const item = cart[index];
-            const newQuantity = prompt(`Modifier la quantité pour "${item.product.name}" :`, item.quantity);
+            updateStats() {
+                // Ventes du jour
+                const today = new Date().toISOString().split('T')[0];
+                const dailySales = salesHistory
+                    .filter(sale => sale.date === today)
+                    .reduce((total, sale) => total + sale.amount, 0);
+                const dailySalesElement = document.getElementById('daily-sales');
+                if (dailySalesElement) dailySalesElement.textContent = `${dailySales.toFixed(2)} €`;
+                
+                // Ventes totales
+                const totalSales = salesHistory.reduce((total, sale) => total + sale.amount, 0);
+                const totalSalesElement = document.getElementById('total-sales');
+                if (totalSalesElement) totalSalesElement.textContent = `${totalSales.toFixed(2)} €`;
+                
+                // Produits en stock
+                const totalStock = products.reduce((total, product) => total + product.stock, 0);
+                const totalStockElement = document.getElementById('total-stock');
+                if (totalStockElement) totalStockElement.textContent = totalStock;
+                
+                // Valeur du stock
+                const stockValue = products.reduce((total, product) => total + (product.price * product.stock), 0);
+                const stockValueElement = document.getElementById('stock-value');
+                if (stockValueElement) stockValueElement.textContent = `${stockValue.toFixed(2)} €`;
+                
+                const totalStockValueElement = document.getElementById('total-stock-value');
+                if (totalStockValueElement) totalStockValueElement.textContent = `${stockValue.toFixed(2)} €`;
+                
+                // Mettre à jour l'historique des ventes
+                this.renderSalesHistory();
+                
+                // Mettre à jour la liste des réservations
+                this.renderReservations();
+            },
             
-            if (newQuantity !== null) {
-                const quantity = parseInt(newQuantity);
-                
-                if (isNaN(quantity) || quantity < 1) {
-                    alert('Veuillez entrer une quantité valide.');
-                    return;
-                }
-                
-                if (quantity > item.product.stock) {
-                    alert(`Quantité demandée non disponible. Stock actuel : ${item.product.stock}`);
-                    return;
-                }
-                
-                item.quantity = quantity;
-                
-                if (discountType === 'individual') {
-                    const discount = prompt(`Remise pour "${item.product.name}" (en %) :`, item.discount);
-                    
-                    if (discount !== null) {
-                        const discountValue = parseFloat(discount);
+            setupEventListeners() {
+                // Navigation par onglets
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        // Désactiver tous les onglets
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                         
-                        if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
-                            alert('Veuillez entrer une remise valide (entre 0 et 100).');
+                        // Activer l'onglet sélectionné
+                        this.classList.add('active');
+                        const tabId = `${this.dataset.tab}-tab`;
+                        const tabContent = document.getElementById(tabId);
+                        if (tabContent) tabContent.classList.add('active');
+                    });
+                });
+                
+                // Ajouter au panier
+                document.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('add-to-cart') || e.target.closest('.add-to-cart')) {
+                        const button = e.target.classList.contains('add-to-cart') ? e.target : e.target.closest('.add-to-cart');
+                        const productId = parseInt(button.dataset.id);
+                        app.addToCart(productId);
+                    }
+                });
+                
+                // Réserver un produit
+                document.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('reserve-product') || e.target.closest('.reserve-product')) {
+                        const button = e.target.classList.contains('reserve-product') ? e.target : e.target.closest('.reserve-product');
+                        const productId = parseInt(button.dataset.id);
+                        const reservationProductSelect = document.getElementById('reservation-product');
+                        if (reservationProductSelect) reservationProductSelect.value = productId;
+                        const reservationsTab = document.querySelector('.tab[data-tab="reservations"]');
+                        if (reservationsTab) reservationsTab.click();
+                    }
+                });
+                
+                // Options de remise
+                document.querySelectorAll('.discount-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.discount-option').forEach(o => o.classList.remove('active'));
+                        this.classList.add('active');
+                        discountType = this.dataset.type;
+                    });
+                });
+                
+                // Appliquer une remise
+                const applyDiscountBtn = document.getElementById('apply-discount');
+                if (applyDiscountBtn) {
+                    applyDiscountBtn.addEventListener('click', function() {
+                        const discountInput = document.getElementById('global-discount');
+                        const discountValue = parseFloat(discountInput.value) || 0;
+                        
+                        if (discountValue < 0 || discountValue > 100) {
+                            alert('La remise doit être comprise entre 0 et 100%.');
                             return;
                         }
                         
-                        item.discount = discountValue;
+                        if (discountType === 'global') {
+                            globalDiscount = discountValue;
+                        } else if (discountType === 'individual' && cart.length > 0) {
+                            // Appliquer la remise à tous les articles du panier
+                            cart.forEach(item => {
+                                item.discount = discountValue;
+                            });
+                        }
+                        
+                        app.updateCart();
+                    });
+                }
+                
+                // Valider le paiement
+                const validatePaymentBtn = document.getElementById('validate-payment');
+                if (validatePaymentBtn) {
+                    validatePaymentBtn.addEventListener('click', function() {
+                        if (cart.length === 0) {
+                            alert('Le panier est vide. Ajoutez des produits avant de valider le paiement.');
+                            return;
+                        }
+                        
+                        app.validatePayment();
+                    });
+                }
+                
+                // Vider le panier
+                const clearCartBtn = document.getElementById('clear-cart');
+                if (clearCartBtn) {
+                    clearCartBtn.addEventListener('click', function() {
+                        if (cart.length === 0) {
+                            alert('Le panier est déjà vide.');
+                            return;
+                        }
+                        
+                        if (confirm('Êtes-vous sûr de vouloir vider le panier ?')) {
+                            cart = [];
+                            globalDiscount = 0;
+                            const globalDiscountInput = document.getElementById('global-discount');
+                            if (globalDiscountInput) globalDiscountInput.value = '';
+                            app.updateCart();
+                        }
+                    });
+                }
+                
+                // Ajouter une réservation
+                const addReservationBtn = document.getElementById('add-reservation');
+                if (addReservationBtn) {
+                    addReservationBtn.addEventListener('click', function() {
+                        app.addReservation();
+                    });
+                }
+                
+                // Filtrer l'historique
+                const historyFilter = document.getElementById('history-filter');
+                if (historyFilter) {
+                    historyFilter.addEventListener('change', function() {
+                        app.renderSalesHistory();
+                    });
+                }
+                
+                // Gestion des produits
+                const addProductBtn = document.getElementById('add-product-btn');
+                if (addProductBtn) {
+                    addProductBtn.addEventListener('click', function() {
+                        app.openProductModal();
+                    });
+                }
+                
+                const productForm = document.getElementById('product-form');
+                if (productForm) {
+                    productForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        app.saveProduct();
+                    });
+                }
+                
+                const cancelProductBtn = document.getElementById('cancel-product-btn');
+                if (cancelProductBtn) {
+                    cancelProductBtn.addEventListener('click', function() {
+                        const productModal = document.getElementById('product-modal');
+                        if (productModal) productModal.style.display = 'none';
+                    });
+                }
+                
+                // Fermer les modales
+                document.querySelectorAll('.close-modal').forEach(button => {
+                    button.addEventListener('click', function() {
+                        document.querySelectorAll('.modal').forEach(modal => {
+                            modal.style.display = 'none';
+                        });
+                    });
+                });
+                
+                const closeSaleModalBtn = document.getElementById('close-sale-modal');
+                if (closeSaleModalBtn) {
+                    closeSaleModalBtn.addEventListener('click', function() {
+                        const saleConfirmationModal = document.getElementById('sale-confirmation-modal');
+                        if (saleConfirmationModal) saleConfirmationModal.style.display = 'none';
+                    });
+                }
+                
+                const closeReservationModalBtn = document.getElementById('close-reservation-modal');
+                if (closeReservationModalBtn) {
+                    closeReservationModalBtn.addEventListener('click', function() {
+                        const reservationAlertModal = document.getElementById('reservation-alert-modal');
+                        if (reservationAlertModal) reservationAlertModal.style.display = 'none';
+                    });
+                }
+                
+                // Fermer les modales en cliquant à l'extérieur
+                window.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('modal')) {
+                        e.target.style.display = 'none';
+                    }
+                });
+            },
+            
+            addToCart(productId) {
+                const product = products.find(p => p.id === productId);
+                
+                if (!product) return;
+                
+                if (product.stock <= 0) {
+                    alert('Ce produit est en rupture de stock.');
+                    return;
+                }
+                
+                const existingItem = cart.find(item => item.product.id === productId);
+                
+                if (existingItem) {
+                    if (existingItem.quantity >= product.stock) {
+                        alert(`Quantité maximale disponible pour ce produit : ${product.stock}`);
+                        return;
+                    }
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        product: product,
+                        quantity: 1,
+                        discount: 0
+                    });
+                }
+                
+                this.updateCart();
+                
+                // Feedback visuel
+                const button = document.querySelector(`.add-to-cart[data-id="${productId}"]`);
+                if (button) {
+                    const originalHTML = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check"></i> Ajouté';
+                    button.style.backgroundColor = 'var(--success)';
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.style.backgroundColor = '';
+                    }, 1000);
+                }
+            },
+            
+            updateCart() {
+                const cartItems = document.getElementById('cart-items');
+                const cartTotal = document.getElementById('cart-total');
+                
+                if (!cartItems) return;
+                
+                if (cart.length === 0) {
+                    cartItems.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>Votre panier est vide</p>
+                            <p class="text-muted">Ajoutez des produits pour commencer une vente</p>
+                        </div>
+                    `;
+                    if (cartTotal) cartTotal.textContent = '0.00 €';
+                    return;
+                }
+                
+                cartItems.innerHTML = '';
+                
+                let subtotal = 0;
+                
+                cart.forEach((item, index) => {
+                    const itemTotal = item.product.price * item.quantity * (1 - item.discount / 100);
+                    subtotal += itemTotal;
+                    
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    
+                    cartItem.innerHTML = `
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.product.name}</div>
+                            <div class="cart-item-details">
+                                ${item.product.price.toFixed(2)} € x ${item.quantity}
+                                ${item.discount > 0 ? ` | -${item.discount}%` : ''}
+                            </div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div style="font-weight: bold; margin-bottom: 5px;">${itemTotal.toFixed(2)} €</div>
+                            <div>
+                                <button class="btn btn-primary btn-small edit-item" data-index="${index}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-small remove-item" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    cartItems.appendChild(cartItem);
+                });
+                
+                // Appliquer la remise globale
+                const totalAfterDiscount = subtotal * (1 - globalDiscount / 100);
+                if (cartTotal) cartTotal.textContent = `${totalAfterDiscount.toFixed(2)} €`;
+                
+                // Ajouter les écouteurs d'événements pour les boutons du panier
+                document.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        cart.splice(index, 1);
+                        app.updateCart();
+                    });
+                });
+                
+                document.querySelectorAll('.edit-item').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        app.editCartItem(index);
+                    });
+                });
+            },
+            
+            editCartItem(index) {
+                const item = cart[index];
+                const newQuantity = prompt(`Modifier la quantité pour "${item.product.name}" :`, item.quantity);
+                
+                if (newQuantity !== null) {
+                    const quantity = parseInt(newQuantity);
+                    
+                    if (isNaN(quantity) || quantity < 1) {
+                        alert('Veuillez entrer une quantité valide.');
+                        return;
+                    }
+                    
+                    if (quantity > item.product.stock) {
+                        alert(`Quantité demandée non disponible. Stock actuel : ${item.product.stock}`);
+                        return;
+                    }
+                    
+                    item.quantity = quantity;
+                    
+                    if (discountType === 'individual') {
+                        const discount = prompt(`Remise pour "${item.product.name}" (en %) :`, item.discount);
+                        
+                        if (discount !== null) {
+                            const discountValue = parseFloat(discount);
+                            
+                            if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+                                alert('Veuillez entrer une remise valide (entre 0 et 100).');
+                                return;
+                            }
+                            
+                            item.discount = discountValue;
+                        }
+                    }
+                    
+                    this.updateCart();
+                }
+            },
+            
+            validatePayment() {
+                // Vérifier le stock
+                for (const item of cart) {
+                    if (item.quantity > item.product.stock) {
+                        alert(`Stock insuffisant pour "${item.product.name}". Stock actuel : ${item.product.stock}`);
+                        return;
                     }
                 }
                 
-                updateCart();
-            }
-        }
-        
-        // Fonction pour valider le paiement
-        function validatePayment() {
-            // Vérifier le stock
-            for (const item of cart) {
-                if (item.quantity > item.product.stock) {
-                    alert(`Stock insuffisant pour "${item.product.name}". Stock actuel : ${item.product.stock}`);
+                // Calculer le montant total
+                let subtotal = 0;
+                cart.forEach(item => {
+                    subtotal += item.product.price * item.quantity * (1 - item.discount / 100);
+                });
+                
+                const total = subtotal * (1 - globalDiscount / 100);
+                
+                // Mettre à jour le stock
+                cart.forEach(item => {
+                    const product = products.find(p => p.id === item.product.id);
+                    if (product) {
+                        product.stock -= item.quantity;
+                    }
+                });
+                
+                // Enregistrer la vente dans l'historique
+                const saleDateInput = document.getElementById('sale-date');
+                const saleDate = saleDateInput ? saleDateInput.value : new Date().toISOString().split('T')[0];
+                salesHistory.push({
+                    date: saleDate,
+                    amount: total,
+                    items: [...cart]
+                });
+                
+                // Afficher la confirmation
+                const saleConfirmationAmount = document.getElementById('sale-confirmation-amount');
+                if (saleConfirmationAmount) saleConfirmationAmount.textContent = `${total.toFixed(2)} €`;
+                
+                const saleConfirmationModal = document.getElementById('sale-confirmation-modal');
+                if (saleConfirmationModal) saleConfirmationModal.style.display = 'flex';
+                
+                // Réinitialiser le panier
+                cart = [];
+                globalDiscount = 0;
+                const globalDiscountInput = document.getElementById('global-discount');
+                if (globalDiscountInput) globalDiscountInput.value = '';
+                
+                // Mettre à jour l'interface
+                this.updateCart();
+                this.renderProducts();
+                this.renderStockProducts();
+                this.updateStats();
+                this.saveData();
+            },
+            
+            addReservation() {
+                const reservationProductSelect = document.getElementById('reservation-product');
+                const clientPhoneInput = document.getElementById('client-phone');
+                const reservationNotesInput = document.getElementById('reservation-notes');
+                
+                if (!reservationProductSelect || !clientPhoneInput) return;
+                
+                const productId = parseInt(reservationProductSelect.value);
+                const phone = clientPhoneInput.value;
+                const notes = reservationNotesInput ? reservationNotesInput.value : '';
+                
+                if (!productId || !phone) {
+                    alert('Veuillez sélectionner un produit et saisir un numéro de téléphone.');
                     return;
                 }
-            }
-            
-            // Calculer le montant total
-            let subtotal = 0;
-            cart.forEach(item => {
-                subtotal += item.product.price * item.quantity * (1 - item.discount / 100);
-            });
-            
-            const total = subtotal * (1 - globalDiscount / 100);
-            
-            // Mettre à jour le stock
-            cart.forEach(item => {
-                const product = products.find(p => p.id === item.product.id);
-                if (product) {
-                    product.stock -= item.quantity;
+                
+                // Validation du numéro de téléphone (simplifiée)
+                const phoneRegex = /^[0-9]{10}$/;
+                const cleanPhone = phone.replace(/\s/g, '');
+                
+                if (!phoneRegex.test(cleanPhone)) {
+                    alert('Veuillez saisir un numéro de téléphone valide (10 chiffres).');
+                    return;
                 }
-            });
-            
-            // Enregistrer la vente dans l'historique
-            const saleDate = document.getElementById('sale-date').value;
-            salesHistory.push({
-                date: saleDate,
-                amount: total,
-                items: [...cart]
-            });
-            
-            // Afficher la confirmation
-            document.getElementById('sale-confirmation-amount').textContent = `${total.toFixed(2)} €`;
-            document.getElementById('sale-confirmation-modal').style.display = 'flex';
-            
-            // Réinitialiser le panier
-            cart = [];
-            globalDiscount = 0;
-            document.getElementById('global-discount').value = '';
-            
-            // Mettre à jour l'interface
-            updateCart();
-            renderProducts();
-            renderStockProducts();
-            updateStats();
-            saveData();
-        }
-        
-        // Fonction pour ajouter une réservation
-        function addReservation() {
-            const productId = parseInt(document.getElementById('reservation-product').value);
-            const phone = document.getElementById('client-phone').value;
-            const notes = document.getElementById('reservation-notes').value;
-            
-            if (!productId || !phone) {
-                alert('Veuillez sélectionner un produit et saisir un numéro de téléphone.');
-                return;
-            }
-            
-            // Validation du numéro de téléphone (simplifiée)
-            const phoneRegex = /^[0-9]{10}$/;
-            const cleanPhone = phone.replace(/\s/g, '');
-            
-            if (!phoneRegex.test(cleanPhone)) {
-                alert('Veuillez saisir un numéro de téléphone valide (10 chiffres).');
-                return;
-            }
-            
-            const product = products.find(p => p.id === productId);
-            
-            if (!product) {
-                alert('Produit non trouvé.');
-                return;
-            }
-            
-            if (product.stock <= 0) {
-                alert('Ce produit est en rupture de stock.');
-                return;
-            }
-            
-            // Vérifier si une réservation existe déjà pour ce produit et ce numéro
-            const existingReservation = reservations.find(r => 
-                r.productId === productId && r.phone === cleanPhone && r.status === 'active');
                 
-            if (existingReservation) {
-                alert('Une réservation active existe déjà pour ce produit et ce numéro de téléphone.');
-                return;
-            }
-            
-            // Créer la réservation
-            const reservation = {
-                id: Date.now(),
-                productId: productId,
-                productName: product.name,
-                phone: cleanPhone,
-                notes: notes,
-                date: new Date().toISOString().split('T')[0],
-                status: 'active'
-            };
-            
-            reservations.push(reservation);
-            
-            // Réinitialiser le formulaire
-            document.getElementById('reservation-product').value = '';
-            document.getElementById('client-phone').value = '';
-            document.getElementById('reservation-notes').value = '';
-            
-            // Mettre à jour l'interface
-            updateStats();
-            saveData();
-            
-            // Feedback
-            alert('Réservation ajoutée avec succès !');
-        }
-        
-        // Fonction pour afficher les réservations
-        function renderReservations() {
-            const reservationsList = document.getElementById('reservations-list');
-            reservationsList.innerHTML = '';
-            
-            const activeReservations = reservations.filter(r => r.status === 'active');
-            
-            if (activeReservations.length === 0) {
-                reservationsList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="far fa-calendar-check"></i>
-                        <p>Aucune réservation active</p>
-                        <p class="text-muted">Les réservations apparaîtront ici</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            activeReservations.forEach(reservation => {
-                const reservationItem = document.createElement('div');
-                reservationItem.className = 'reservation-item';
+                const product = products.find(p => p.id === productId);
                 
-                reservationItem.innerHTML = `
-                    <div class="reservation-info">
-                        <h4>${reservation.productName}</h4>
-                        <p><i class="fas fa-phone"></i> ${formatPhoneNumber(reservation.phone)}</p>
-                        <p><i class="far fa-calendar"></i> Réservé le ${reservation.date}</p>
-                        ${reservation.notes ? `<p><i class="fas fa-sticky-note"></i> ${reservation.notes}</p>` : ''}
-                    </div>
-                    <div class="reservation-actions">
-                        <button class="btn btn-success btn-small complete-reservation" data-id="${reservation.id}">
-                            <i class="fas fa-cash-register"></i> Vendre
-                        </button>
-                        <button class="btn btn-danger btn-small cancel-reservation" data-id="${reservation.id}">
-                            <i class="fas fa-times"></i> Annuler
-                        </button>
-                    </div>
-                `;
+                if (!product) {
+                    alert('Produit non trouvé.');
+                    return;
+                }
                 
-                reservationsList.appendChild(reservationItem);
-            });
-            
-            // Ajouter les écouteurs d'événements pour les boutons de réservation
-            document.querySelectorAll('.complete-reservation').forEach(button => {
-                button.addEventListener('click', function() {
-                    const reservationId = parseInt(this.dataset.id);
-                    completeReservation(reservationId);
-                });
-            });
-            
-            document.querySelectorAll('.cancel-reservation').forEach(button => {
-                button.addEventListener('click', function() {
-                    const reservationId = parseInt(this.dataset.id);
-                    cancelReservation(reservationId);
-                });
-            });
-        }
-        
-        // Fonction pour formater un numéro de téléphone
-        function formatPhoneNumber(phone) {
-            return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
-        }
-        
-        // Fonction pour compléter une réservation (vendre le produit)
-        function completeReservation(reservationId) {
-            const reservationIndex = reservations.findIndex(r => r.id === reservationId);
-            
-            if (reservationIndex === -1) return;
-            
-            const reservation = reservations[reservationIndex];
-            const product = products.find(p => p.id === reservation.productId);
-            
-            if (!product) {
-                alert('Produit non trouvé.');
-                return;
-            }
-            
-            if (product.stock <= 0) {
-                alert('Ce produit est en rupture de stock.');
-                return;
-            }
-            
-            // Ajouter au panier
-            addToCart(product.id);
-            
-            // Marquer la réservation comme complétée
-            reservations[reservationIndex].status = 'completed';
-            
-            // Mettre à jour l'interface
-            updateStats();
-            saveData();
-            
-            alert('Réservation complétée. Le produit a été ajouté au panier.');
-        }
-        
-        // Fonction pour annuler une réservation
-        function cancelReservation(reservationId) {
-            if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
-                const reservationIndex = reservations.findIndex(r => r.id === reservationId);
+                if (product.stock <= 0) {
+                    alert('Ce produit est en rupture de stock.');
+                    return;
+                }
                 
-                if (reservationIndex !== -1) {
-                    reservations[reservationIndex].status = 'cancelled';
+                // Vérifier si une réservation existe déjà pour ce produit et ce numéro
+                const existingReservation = reservations.find(r => 
+                    r.productId === productId && r.phone === cleanPhone && r.status === 'active');
                     
-                    // Mettre à jour l'interface
-                    updateStats();
-                    saveData();
+                if (existingReservation) {
+                    alert('Une réservation active existe déjà pour ce produit et ce numéro de téléphone.');
+                    return;
                 }
-            }
-        }
-        
-        // Fonction pour afficher l'historique des ventes
-        function renderSalesHistory() {
-            const salesHistoryElement = document.getElementById('sales-history');
-            salesHistoryElement.innerHTML = '';
-            
-            const filterDate = document.getElementById('history-filter').value;
-            const filteredSales = filterDate ? 
-                salesHistory.filter(sale => sale.date === filterDate) : 
-                salesHistory;
-            
-            if (filteredSales.length === 0) {
-                salesHistoryElement.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-receipt"></i>
-                        <p>Aucune vente pour cette date</p>
-                        <p class="text-muted">Les ventes apparaîtront ici</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Trier les ventes par date (du plus récent au plus ancien)
-            filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            filteredSales.forEach((sale, index) => {
-                const saleElement = document.createElement('div');
-                saleElement.className = 'reservation-item';
                 
-                // Formater la date
-                const dateObj = new Date(sale.date);
-                const formattedDate = dateObj.toLocaleDateString('fr-FR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+                // Créer la réservation
+                const reservation = {
+                    id: Date.now(),
+                    productId: productId,
+                    productName: product.name,
+                    phone: cleanPhone,
+                    notes: notes,
+                    date: new Date().toISOString().split('T')[0],
+                    status: 'active'
+                };
                 
-                saleElement.innerHTML = `
-                    <div class="reservation-info">
-                        <h4>Vente #${filteredSales.length - index} - ${formattedDate}</h4>
-                        <p><strong>Montant :</strong> ${sale.amount.toFixed(2)} €</p>
-                        <p><strong>Produits :</strong> ${sale.items.map(item => `${item.product.name} (x${item.quantity})`).join(', ')}</p>
-                    </div>
-                `;
+                reservations.push(reservation);
                 
-                salesHistoryElement.appendChild(saleElement);
-            });
-        }
-        
-        // Fonction pour vérifier les alertes de réservation
-        function checkReservationAlerts() {
-            // Vérifier les réservations en attente
-            const activeReservations = reservations.filter(r => r.status === 'active');
+                // Réinitialiser le formulaire
+                reservationProductSelect.value = '';
+                clientPhoneInput.value = '';
+                if (reservationNotesInput) reservationNotesInput.value = '';
+                
+                // Mettre à jour l'interface
+                this.updateStats();
+                this.saveData();
+                
+                // Feedback
+                alert('Réservation ajoutée avec succès !');
+            },
             
-            if (activeReservations.length > 0) {
-                // Afficher une alerte après un délai
-                setTimeout(() => {
-                    const alertContent = document.getElementById('reservation-alert-content');
-                    alertContent.innerHTML = `
-                        <p>Vous avez <strong>${activeReservations.length}</strong> réservation(s) en attente :</p>
-                        <ul style="margin: 15px 0; padding-left: 20px;">
-                            ${activeReservations.map(r => 
-                                `<li>${r.productName} - ${formatPhoneNumber(r.phone)}</li>`
-                            ).join('')}
-                        </ul>
-                        <p>N'oubliez pas de contacter vos clients !</p>
+            renderReservations() {
+                const reservationsList = document.getElementById('reservations-list');
+                if (!reservationsList) return;
+                
+                reservationsList.innerHTML = '';
+                
+                const activeReservations = reservations.filter(r => r.status === 'active');
+                
+                if (activeReservations.length === 0) {
+                    reservationsList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="far fa-calendar-check"></i>
+                            <p>Aucune réservation active</p>
+                            <p class="text-muted">Les réservations apparaîtront ici</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                activeReservations.forEach(reservation => {
+                    const reservationItem = document.createElement('div');
+                    reservationItem.className = 'reservation-item';
+                    
+                    reservationItem.innerHTML = `
+                        <div class="reservation-info">
+                            <h4>${reservation.productName}</h4>
+                            <p><i class="fas fa-phone"></i> ${this.formatPhoneNumber(reservation.phone)}</p>
+                            <p><i class="far fa-calendar"></i> Réservé le ${reservation.date}</p>
+                            ${reservation.notes ? `<p><i class="fas fa-sticky-note"></i> ${reservation.notes}</p>` : ''}
+                        </div>
+                        <div class="reservation-actions">
+                            <button class="btn btn-success btn-small complete-reservation" data-id="${reservation.id}">
+                                <i class="fas fa-cash-register"></i> Vendre
+                            </button>
+                            <button class="btn btn-danger btn-small cancel-reservation" data-id="${reservation.id}">
+                                <i class="fas fa-times"></i> Annuler
+                            </button>
+                        </div>
                     `;
                     
-                    document.getElementById('reservation-alert-modal').style.display = 'flex';
-                }, 2000);
-            }
-        }
-        
-        // Fonctions pour la gestion des produits
-        function openProductModal(productId = null) {
-            const modal = document.getElementById('product-modal');
-            const title = document.getElementById('product-modal-title');
-            const form = document.getElementById('product-form');
-            
-            if (productId) {
-                // Mode édition
-                const product = products.find(p => p.id === productId);
-                if (!product) return;
-                
-                title.innerHTML = '<i class="fas fa-edit"></i> Modifier le produit';
-                document.getElementById('product-id').value = product.id;
-                document.getElementById('product-name').value = product.name;
-                document.getElementById('product-category').value = product.category;
-                document.getElementById('product-price').value = product.price;
-                document.getElementById('product-stock').value = product.stock;
-                document.getElementById('product-description').value = product.description || '';
-            } else {
-                // Mode ajout
-                title.innerHTML = '<i class="fas fa-box"></i> Ajouter un produit';
-                form.reset();
-                document.getElementById('product-id').value = '';
-            }
-            
-            modal.style.display = 'flex';
-        }
-        
-        function editProduct(productId) {
-            openProductModal(productId);
-        }
-        
-        function saveProduct() {
-            const id = document.getElementById('product-id').value;
-            const name = document.getElementById('product-name').value;
-            const category = document.getElementById('product-category').value;
-            const price = parseFloat(document.getElementById('product-price').value);
-            const stock = parseInt(document.getElementById('product-stock').value);
-            const description = document.getElementById('product-description').value;
-            
-            if (!name || !category || isNaN(price) || isNaN(stock)) {
-                alert('Veuillez remplir tous les champs obligatoires.');
-                return;
-            }
-            
-            if (id) {
-                // Modification
-                const productIndex = products.findIndex(p => p.id === parseInt(id));
-                if (productIndex !== -1) {
-                    products[productIndex].name = name;
-                    products[productIndex].category = category;
-                    products[productIndex].price = price;
-                    products[productIndex].stock = stock;
-                    products[productIndex].description = description;
-                }
-            } else {
-                // Ajout
-                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-                products.push({
-                    id: newId,
-                    name: name,
-                    category: category,
-                    price: price,
-                    stock: stock,
-                    description: description
+                    reservationsList.appendChild(reservationItem);
                 });
-            }
+                
+                // Ajouter les écouteurs d'événements pour les boutons de réservation
+                document.querySelectorAll('.complete-reservation').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const reservationId = parseInt(this.dataset.id);
+                        app.completeReservation(reservationId);
+                    });
+                });
+                
+                document.querySelectorAll('.cancel-reservation').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const reservationId = parseInt(this.dataset.id);
+                        app.cancelReservation(reservationId);
+                    });
+                });
+            },
             
-            // Mettre à jour l'interface
-            renderProducts();
-            renderStockProducts();
-            updateStats();
-            saveData();
+            formatPhoneNumber(phone) {
+                return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+            },
             
-            // Fermer le modal
-            document.getElementById('product-modal').style.display = 'none';
+            completeReservation(reservationId) {
+                const reservationIndex = reservations.findIndex(r => r.id === reservationId);
+                
+                if (reservationIndex === -1) return;
+                
+                const reservation = reservations[reservationIndex];
+                const product = products.find(p => p.id === reservation.productId);
+                
+                if (!product) {
+                    alert('Produit non trouvé.');
+                    return;
+                }
+                
+                if (product.stock <= 0) {
+                    alert('Ce produit est en rupture de stock.');
+                    return;
+                }
+                
+                // Ajouter au panier
+                this.addToCart(product.id);
+                
+                // Marquer la réservation comme complétée
+                reservations[reservationIndex].status = 'completed';
+                
+                // Mettre à jour l'interface
+                this.updateStats();
+                this.saveData();
+                
+                alert('Réservation complétée. Le produit a été ajouté au panier.');
+            },
             
-            alert(id ? 'Produit modifié avec succès !' : 'Produit ajouté avec succès !');
-        }
-        
-        function deleteProduct(productId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
-                const productIndex = products.findIndex(p => p.id === productId);
-                if (productIndex !== -1) {
-                    products.splice(productIndex, 1);
+            cancelReservation(reservationId) {
+                if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+                    const reservationIndex = reservations.findIndex(r => r.id === reservationId);
                     
-                    // Mettre à jour l'interface
-                    renderProducts();
-                    renderStockProducts();
-                    updateStats();
-                    saveData();
+                    if (reservationIndex !== -1) {
+                        reservations[reservationIndex].status = 'cancelled';
+                        
+                        // Mettre à jour l'interface
+                        this.updateStats();
+                        this.saveData();
+                    }
+                }
+            },
+            
+            renderSalesHistory() {
+                const salesHistoryElement = document.getElementById('sales-history');
+                if (!salesHistoryElement) return;
+                
+                salesHistoryElement.innerHTML = '';
+                
+                const historyFilter = document.getElementById('history-filter');
+                const filterDate = historyFilter ? historyFilter.value : '';
+                const filteredSales = filterDate ? 
+                    salesHistory.filter(sale => sale.date === filterDate) : 
+                    salesHistory;
+                
+                if (filteredSales.length === 0) {
+                    salesHistoryElement.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-receipt"></i>
+                            <p>Aucune vente pour cette date</p>
+                            <p class="text-muted">Les ventes apparaîtront ici</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Trier les ventes par date (du plus récent au plus ancien)
+                filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                filteredSales.forEach((sale, index) => {
+                    const saleElement = document.createElement('div');
+                    saleElement.className = 'reservation-item';
                     
-                    alert('Produit supprimé avec succès !');
+                    // Formater la date
+                    const dateObj = new Date(sale.date);
+                    const formattedDate = dateObj.toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    
+                    saleElement.innerHTML = `
+                        <div class="reservation-info">
+                            <h4>Vente #${filteredSales.length - index} - ${formattedDate}</h4>
+                            <p><strong>Montant :</strong> ${sale.amount.toFixed(2)} €</p>
+                            <p><strong>Produits :</strong> ${sale.items.map(item => `${item.product.name} (x${item.quantity})`).join(', ')}</p>
+                        </div>
+                    `;
+                    
+                    salesHistoryElement.appendChild(saleElement);
+                });
+            },
+            
+            checkReservationAlerts() {
+                // Vérifier les réservations en attente
+                const activeReservations = reservations.filter(r => r.status === 'active');
+                
+                if (activeReservations.length > 0) {
+                    // Afficher une alerte après un délai
+                    setTimeout(() => {
+                        const alertContent = document.getElementById('reservation-alert-content');
+                        if (!alertContent) return;
+                        
+                        alertContent.innerHTML = `
+                            <p>Vous avez <strong>${activeReservations.length}</strong> réservation(s) en attente :</p>
+                            <ul style="margin: 15px 0; padding-left: 20px;">
+                                ${activeReservations.map(r => 
+                                    `<li>${r.productName} - ${this.formatPhoneNumber(r.phone)}</li>`
+                                ).join('')}
+                            </ul>
+                            <p>N'oubliez pas de contacter vos clients !</p>
+                        `;
+                        
+                        const reservationAlertModal = document.getElementById('reservation-alert-modal');
+                        if (reservationAlertModal) reservationAlertModal.style.display = 'flex';
+                    }, 2000);
+                }
+            },
+            
+            openProductModal(productId = null) {
+                const modal = document.getElementById('product-modal');
+                const title = document.getElementById('product-modal-title');
+                const form = document.getElementById('product-form');
+                
+                if (!modal || !title || !form) return;
+                
+                if (productId) {
+                    // Mode édition
+                    const product = products.find(p => p.id === productId);
+                    if (!product) return;
+                    
+                    title.innerHTML = '<i class="fas fa-edit"></i> Modifier le produit';
+                    document.getElementById('product-id').value = product.id;
+                    document.getElementById('product-name').value = product.name;
+                    document.getElementById('product-category').value = product.category;
+                    document.getElementById('product-price').value = product.price;
+                    document.getElementById('product-stock').value = product.stock;
+                    document.getElementById('product-description').value = product.description || '';
+                } else {
+                    // Mode ajout
+                    title.innerHTML = '<i class="fas fa-box"></i> Ajouter un produit';
+                    form.reset();
+                    document.getElementById('product-id').value = '';
+                }
+                
+                modal.style.display = 'flex';
+            },
+            
+            editProduct(productId) {
+                this.openProductModal(productId);
+            },
+            
+            saveProduct() {
+                const id = document.getElementById('product-id').value;
+                const name = document.getElementById('product-name').value;
+                const category = document.getElementById('product-category').value;
+                const price = parseFloat(document.getElementById('product-price').value);
+                const stock = parseInt(document.getElementById('product-stock').value);
+                const description = document.getElementById('product-description').value;
+                
+                if (!name || !category || isNaN(price) || isNaN(stock)) {
+                    alert('Veuillez remplir tous les champs obligatoires.');
+                    return;
+                }
+                
+                if (id) {
+                    // Modification
+                    const productIndex = products.findIndex(p => p.id === parseInt(id));
+                    if (productIndex !== -1) {
+                        products[productIndex].name = name;
+                        products[productIndex].category = category;
+                        products[productIndex].price = price;
+                        products[productIndex].stock = stock;
+                        products[productIndex].description = description;
+                    }
+                } else {
+                    // Ajout
+                    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                    products.push({
+                        id: newId,
+                        name: name,
+                        category: category,
+                        price: price,
+                        stock: stock,
+                        description: description
+                    });
+                }
+                
+                // Mettre à jour l'interface
+                this.renderProducts();
+                this.renderStockProducts();
+                this.updateStats();
+                this.saveData();
+                
+                // Fermer le modal
+                const productModal = document.getElementById('product-modal');
+                if (productModal) productModal.style.display = 'none';
+                
+                alert(id ? 'Produit modifié avec succès !' : 'Produit ajouté avec succès !');
+            },
+            
+            deleteProduct(productId) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
+                    const productIndex = products.findIndex(p => p.id === productId);
+                    if (productIndex !== -1) {
+                        products.splice(productIndex, 1);
+                        
+                        // Mettre à jour l'interface
+                        this.renderProducts();
+                        this.renderStockProducts();
+                        this.updateStats();
+                        this.saveData();
+                        
+                        alert('Produit supprimé avec succès !');
+                    }
                 }
             }
-        }
+        };
+
+        // =============================================
+        // INITIALISATION DE L'APPLICATION
+        // =============================================
+        
+        // Démarrer le système de sécurité au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            security.init();
+        });
     </script>
 </body>
 </html>
