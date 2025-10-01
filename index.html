@@ -256,11 +256,35 @@
             width: 140px;
         }
         
+        /* Currency Selector */
+        .currency-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .currency-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .currency-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
         /* Main Content Area */
         .main-content {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 140px);
             overflow: hidden;
         }
         
@@ -896,6 +920,80 @@
         .text-danger { color: var(--danger); }
         .text-muted { color: var(--gray); font-size: 0.9rem; }
         
+        /* Currency Toggle */
+        .currency-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: var(--gray-light);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+        }
+        
+        .currency-toggle span {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Price Display */
+        .price-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+        
         /* Responsive Adjustments */
         @media (min-width: 768px) {
             .container {
@@ -931,7 +1029,7 @@
             }
             
             .main-content {
-                height: calc(100vh - 100px);
+                height: calc(100vh - 120px);
             }
             
             .product-item {
@@ -964,6 +1062,11 @@
             
             .report-table {
                 min-width: auto;
+            }
+            
+            .currency-selector {
+                margin-top: 0;
+                margin-left: 10px;
             }
         }
         
@@ -1123,6 +1226,10 @@
             <div class="date-selector">
                 <i class="fas fa-calendar-alt"></i>
                 <input type="date" id="sale-date">
+            </div>
+            <div class="currency-selector">
+                <button class="currency-btn active" data-currency="EUR">EUR</button>
+                <button class="currency-btn" data-currency="PLN">PLN</button>
             </div>
         </header>
         
@@ -1583,8 +1690,17 @@
                     </select>
                 </div>
                 
+                <div class="currency-toggle">
+                    <span>Devise de saisie :</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="price-currency-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="price-currency-label">EUR</span>
+                </div>
+                
                 <div class="form-group">
-                    <label for="product-price">Prix (€) :</label>
+                    <label for="product-price">Prix :</label>
                     <input type="number" id="product-price" min="0" step="0.01" required>
                 </div>
                 
@@ -1618,10 +1734,10 @@
         // MODIFIEZ CES VALEURS PAR BALLA KONATE
         const SECURITY_CONFIG = {
             // Clé d'accès principale - Changez cette valeur
-            accessKey: "Sarounia1",
+            accessKey: "BallaKonate2024!",
             
             // Code personnel - Changez cette valeur (6 chiffres)
-            personalCode: "223117",
+            personalCode: "010189",
             
             // Nombre maximum de tentatives avant verrouillage
             maxAttempts: 5,
@@ -1842,6 +1958,12 @@
         // APPLICATION DE GESTION DES VENTES
         // =============================================
         
+        // Configuration des devises
+        const CURRENCY_CONFIG = {
+            EUR: { symbol: '€', rate: 1 },
+            PLN: { symbol: 'zl', rate: 4.5 } // 1 EUR = 4.5 PLN (taux fictif, à ajuster)
+        };
+        
         // Données de l'application
         let products = [
             { id: 1, name: "Parfum Fleur de Printemps", price: 75.00, stock: 15, category: "Parfum", description: "Parfum floral printanier" },
@@ -1859,6 +1981,8 @@
         let salesHistory = [];
         let globalDiscount = 0;
         let discountType = 'global'; // 'global' or 'individual'
+        let currentCurrency = 'EUR'; // Devise d'affichage par défaut
+        let priceInputCurrency = 'EUR'; // Devise de saisie des prix
 
         let app = {
             init() {
@@ -1875,6 +1999,15 @@
                 
                 // Charger les données depuis le localStorage si disponibles
                 this.loadData();
+                
+                // Charger la devise depuis le localStorage
+                const savedCurrency = localStorage.getItem('currentCurrency');
+                if (savedCurrency) {
+                    currentCurrency = savedCurrency;
+                }
+                
+                // Mettre à jour l'interface de sélection de devise
+                this.updateCurrencySelector();
                 
                 // Afficher les produits
                 this.renderProducts();
@@ -1954,6 +2087,43 @@
                 localStorage.setItem('perfumeProducts', JSON.stringify(products));
                 localStorage.setItem('perfumeReservations', JSON.stringify(reservations));
                 localStorage.setItem('perfumeSalesHistory', JSON.stringify(salesHistory));
+                localStorage.setItem('currentCurrency', currentCurrency);
+            },
+            
+            // Fonctions de conversion de devise
+            convertPrice(price, fromCurrency, toCurrency) {
+                if (fromCurrency === toCurrency) return price;
+                
+                const fromRate = CURRENCY_CONFIG[fromCurrency].rate;
+                const toRate = CURRENCY_CONFIG[toCurrency].rate;
+                
+                return (price / fromRate) * toRate;
+            },
+            
+            formatPrice(price, currency = currentCurrency) {
+                const symbol = CURRENCY_CONFIG[currency].symbol;
+                return `${price.toFixed(2)} ${symbol}`;
+            },
+            
+            updateCurrencySelector() {
+                const currencyButtons = document.querySelectorAll('.currency-btn');
+                currencyButtons.forEach(button => {
+                    if (button.dataset.currency === currentCurrency) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+                
+                // Mettre à jour tous les affichages de prix
+                this.renderProducts();
+                this.renderStockProducts();
+                this.updateCart();
+                this.updateStats();
+                this.renderSalesHistory();
+                this.generateGlobalSalesReport();
+                this.generateMonthlyReport();
+                this.generateStockReport();
             },
             
             renderProducts() {
@@ -1978,11 +2148,13 @@
                         const productItem = document.createElement('div');
                         productItem.className = 'product-item';
                         
+                        const displayPrice = this.convertPrice(product.price, 'EUR', currentCurrency);
+                        
                         productItem.innerHTML = `
                             <div class="product-info">
                                 <div class="product-name">${product.name}</div>
                                 <div class="product-details">
-                                    <span class="product-price">${product.price.toFixed(2)} €</span>
+                                    <span class="product-price">${this.formatPrice(displayPrice)}</span>
                                     <span class="product-stock">${product.stock} en stock</span>
                                     <span class="product-category">${product.category}</span>
                                 </div>
@@ -2028,11 +2200,13 @@
                     const stockStatus = product.stock > 5 ? 'text-success' : (product.stock > 0 ? 'text-warning' : 'text-danger');
                     const stockIcon = product.stock > 5 ? 'fa-check-circle' : (product.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle');
                     
+                    const displayPrice = this.convertPrice(product.price, 'EUR', currentCurrency);
+                    
                     productItem.innerHTML = `
                         <div class="product-info">
                             <div class="product-name">${product.name}</div>
                             <div class="product-details">
-                                <span class="product-price">${product.price.toFixed(2)} €</span>
+                                <span class="product-price">${this.formatPrice(displayPrice)}</span>
                                 <span class="product-stock ${stockStatus}">
                                     <i class="fas ${stockIcon}"></i> ${product.stock} en stock
                                 </span>
@@ -2096,16 +2270,18 @@
             updateStats() {
                 // Ventes du jour
                 const today = new Date().toISOString().split('T')[0];
-                const dailySales = salesHistory
+                const dailySalesEUR = salesHistory
                     .filter(sale => sale.date === today)
                     .reduce((total, sale) => total + sale.amount, 0);
+                const dailySales = this.convertPrice(dailySalesEUR, 'EUR', currentCurrency);
                 const dailySalesElement = document.getElementById('daily-sales');
-                if (dailySalesElement) dailySalesElement.textContent = `${dailySales.toFixed(2)} €`;
+                if (dailySalesElement) dailySalesElement.textContent = this.formatPrice(dailySales);
                 
                 // Ventes totales
-                const totalSales = salesHistory.reduce((total, sale) => total + sale.amount, 0);
+                const totalSalesEUR = salesHistory.reduce((total, sale) => total + sale.amount, 0);
+                const totalSales = this.convertPrice(totalSalesEUR, 'EUR', currentCurrency);
                 const totalSalesElement = document.getElementById('total-sales');
-                if (totalSalesElement) totalSalesElement.textContent = `${totalSales.toFixed(2)} €`;
+                if (totalSalesElement) totalSalesElement.textContent = this.formatPrice(totalSales);
                 
                 // Produits en stock
                 const totalStock = products.reduce((total, product) => total + product.stock, 0);
@@ -2113,12 +2289,13 @@
                 if (totalStockElement) totalStockElement.textContent = totalStock;
                 
                 // Valeur du stock
-                const stockValue = products.reduce((total, product) => total + (product.price * product.stock), 0);
+                const stockValueEUR = products.reduce((total, product) => total + (product.price * product.stock), 0);
+                const stockValue = this.convertPrice(stockValueEUR, 'EUR', currentCurrency);
                 const stockValueElement = document.getElementById('stock-value');
-                if (stockValueElement) stockValueElement.textContent = `${stockValue.toFixed(2)} €`;
+                if (stockValueElement) stockValueElement.textContent = this.formatPrice(stockValue);
                 
                 const totalStockValueElement = document.getElementById('total-stock-value');
-                if (totalStockValueElement) totalStockValueElement.textContent = `${stockValue.toFixed(2)} €`;
+                if (totalStockValueElement) totalStockValueElement.textContent = this.formatPrice(stockValue);
                 
                 // Mettre à jour l'historique des ventes
                 this.renderSalesHistory();
@@ -2142,6 +2319,35 @@
                         if (tabContent) tabContent.classList.add('active');
                     });
                 });
+                
+                // Sélecteur de devise
+                document.querySelectorAll('.currency-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        currentCurrency = this.dataset.currency;
+                        app.updateCurrencySelector();
+                        app.saveData();
+                    });
+                });
+                
+                // Toggle de devise pour la saisie des prix
+                const priceCurrencyToggle = document.getElementById('price-currency-toggle');
+                const priceCurrencyLabel = document.getElementById('price-currency-label');
+                if (priceCurrencyToggle && priceCurrencyLabel) {
+                    priceCurrencyToggle.addEventListener('change', function() {
+                        priceInputCurrency = this.checked ? 'PLN' : 'EUR';
+                        priceCurrencyLabel.textContent = priceInputCurrency;
+                        
+                        // Convertir la valeur actuelle si le champ de prix n'est pas vide
+                        const priceInput = document.getElementById('product-price');
+                        if (priceInput && priceInput.value) {
+                            const currentPrice = parseFloat(priceInput.value);
+                            const convertedPrice = app.convertPrice(currentPrice, 
+                                priceInputCurrency === 'PLN' ? 'EUR' : 'PLN', 
+                                priceInputCurrency);
+                            priceInput.value = convertedPrice.toFixed(2);
+                        }
+                    });
+                }
                 
                 // Ajouter au panier
                 document.addEventListener('click', function(e) {
@@ -2384,17 +2590,20 @@
                             <p class="text-muted">Ajoutez des produits pour commencer une vente</p>
                         </div>
                     `;
-                    if (cartTotal) cartTotal.textContent = '0.00 €';
+                    if (cartTotal) cartTotal.textContent = this.formatPrice(0);
                     return;
                 }
                 
                 cartItems.innerHTML = '';
                 
-                let subtotal = 0;
+                let subtotalEUR = 0;
                 
                 cart.forEach((item, index) => {
-                    const itemTotal = item.product.price * item.quantity * (1 - item.discount / 100);
-                    subtotal += itemTotal;
+                    const itemTotalEUR = item.product.price * item.quantity * (1 - item.discount / 100);
+                    subtotalEUR += itemTotalEUR;
+                    
+                    const itemTotal = this.convertPrice(itemTotalEUR, 'EUR', currentCurrency);
+                    const productPrice = this.convertPrice(item.product.price, 'EUR', currentCurrency);
                     
                     const cartItem = document.createElement('div');
                     cartItem.className = 'cart-item';
@@ -2403,12 +2612,12 @@
                         <div class="cart-item-info">
                             <div class="cart-item-name">${item.product.name}</div>
                             <div class="cart-item-details">
-                                ${item.product.price.toFixed(2)} € x ${item.quantity}
+                                ${this.formatPrice(productPrice)} x ${item.quantity}
                                 ${item.discount > 0 ? ` | -${item.discount}%` : ''}
                             </div>
                         </div>
                         <div class="cart-item-actions">
-                            <div style="font-weight: bold; margin-bottom: 5px;">${itemTotal.toFixed(2)} €</div>
+                            <div style="font-weight: bold; margin-bottom: 5px;">${this.formatPrice(itemTotal)}</div>
                             <div>
                                 <button class="btn btn-primary btn-small edit-item" data-index="${index}">
                                     <i class="fas fa-edit"></i>
@@ -2424,8 +2633,9 @@
                 });
                 
                 // Appliquer la remise globale
-                const totalAfterDiscount = subtotal * (1 - globalDiscount / 100);
-                if (cartTotal) cartTotal.textContent = `${totalAfterDiscount.toFixed(2)} €`;
+                const totalAfterDiscountEUR = subtotalEUR * (1 - globalDiscount / 100);
+                const totalAfterDiscount = this.convertPrice(totalAfterDiscountEUR, 'EUR', currentCurrency);
+                if (cartTotal) cartTotal.textContent = this.formatPrice(totalAfterDiscount);
                 
                 // Ajouter les écouteurs d'événements pour les boutons du panier
                 document.querySelectorAll('.remove-item').forEach(button => {
@@ -2492,12 +2702,13 @@
                 }
                 
                 // Calculer le montant total
-                let subtotal = 0;
+                let subtotalEUR = 0;
                 cart.forEach(item => {
-                    subtotal += item.product.price * item.quantity * (1 - item.discount / 100);
+                    subtotalEUR += item.product.price * item.quantity * (1 - item.discount / 100);
                 });
                 
-                const total = subtotal * (1 - globalDiscount / 100);
+                const totalEUR = subtotalEUR * (1 - globalDiscount / 100);
+                const total = this.convertPrice(totalEUR, 'EUR', currentCurrency);
                 
                 // Mettre à jour le stock
                 cart.forEach(item => {
@@ -2512,13 +2723,13 @@
                 const saleDate = saleDateInput ? saleDateInput.value : new Date().toISOString().split('T')[0];
                 salesHistory.push({
                     date: saleDate,
-                    amount: total,
+                    amount: totalEUR,
                     items: [...cart]
                 });
                 
                 // Afficher la confirmation
                 const saleConfirmationAmount = document.getElementById('sale-confirmation-amount');
-                if (saleConfirmationAmount) saleConfirmationAmount.textContent = `${total.toFixed(2)} €`;
+                if (saleConfirmationAmount) saleConfirmationAmount.textContent = this.formatPrice(total);
                 
                 const saleConfirmationModal = document.getElementById('sale-confirmation-modal');
                 if (saleConfirmationModal) saleConfirmationModal.style.display = 'flex';
@@ -2761,10 +2972,12 @@
                         day: 'numeric'
                     });
                     
+                    const displayAmount = this.convertPrice(sale.amount, 'EUR', currentCurrency);
+                    
                     saleElement.innerHTML = `
                         <div class="reservation-info">
                             <h4>Vente #${filteredSales.length - index} - ${formattedDate}</h4>
-                            <p><strong>Montant :</strong> ${sale.amount.toFixed(2)} €</p>
+                            <p><strong>Montant :</strong> ${this.formatPrice(displayAmount)}</p>
                             <p><strong>Produits :</strong> ${sale.items.map(item => `${item.product.name} (x${item.quantity})`).join(', ')}</p>
                         </div>
                     `;
@@ -2803,8 +3016,17 @@
                 const modal = document.getElementById('product-modal');
                 const title = document.getElementById('product-modal-title');
                 const form = document.getElementById('product-form');
+                const priceCurrencyToggle = document.getElementById('price-currency-toggle');
+                const priceCurrencyLabel = document.getElementById('price-currency-label');
                 
                 if (!modal || !title || !form) return;
+                
+                // Réinitialiser le toggle de devise
+                if (priceCurrencyToggle) {
+                    priceCurrencyToggle.checked = false;
+                    priceInputCurrency = 'EUR';
+                }
+                if (priceCurrencyLabel) priceCurrencyLabel.textContent = 'EUR';
                 
                 if (productId) {
                     // Mode édition
@@ -2836,13 +3058,18 @@
                 const id = document.getElementById('product-id').value;
                 const name = document.getElementById('product-name').value;
                 const category = document.getElementById('product-category').value;
-                const price = parseFloat(document.getElementById('product-price').value);
+                let price = parseFloat(document.getElementById('product-price').value);
                 const stock = parseInt(document.getElementById('product-stock').value);
                 const description = document.getElementById('product-description').value;
                 
                 if (!name || !category || isNaN(price) || isNaN(stock)) {
                     alert('Veuillez remplir tous les champs obligatoires.');
                     return;
+                }
+                
+                // Convertir le prix en EUR si nécessaire
+                if (priceInputCurrency === 'PLN') {
+                    price = this.convertPrice(price, 'PLN', 'EUR');
                 }
                 
                 if (id) {
@@ -2916,19 +3143,23 @@
                     sale.date >= startDate && sale.date <= endDate
                 );
                 
-                // Calculer les statistiques
-                const totalSales = filteredSales.reduce((total, sale) => total + sale.amount, 0);
+                // Calculer les statistiques en EUR
+                const totalSalesEUR = filteredSales.reduce((total, sale) => total + sale.amount, 0);
                 const transactionsCount = filteredSales.length;
                 const productsSold = filteredSales.reduce((total, sale) => 
                     total + sale.items.reduce((sum, item) => sum + item.quantity, 0), 0
                 );
-                const averageCart = transactionsCount > 0 ? totalSales / transactionsCount : 0;
+                const averageCartEUR = transactionsCount > 0 ? totalSalesEUR / transactionsCount : 0;
+                
+                // Convertir en devise d'affichage
+                const totalSales = this.convertPrice(totalSalesEUR, 'EUR', currentCurrency);
+                const averageCart = this.convertPrice(averageCartEUR, 'EUR', currentCurrency);
                 
                 // Mettre à jour l'interface
-                document.getElementById('global-total-sales').textContent = `${totalSales.toFixed(2)} €`;
+                document.getElementById('global-total-sales').textContent = this.formatPrice(totalSales);
                 document.getElementById('global-transactions').textContent = transactionsCount;
                 document.getElementById('global-products-sold').textContent = productsSold;
-                document.getElementById('global-average-cart').textContent = `${averageCart.toFixed(2)} €`;
+                document.getElementById('global-average-cart').textContent = this.formatPrice(averageCart);
                 
                 // Générer le tableau des détails
                 const detailsTable = document.getElementById('global-sales-details');
@@ -2960,9 +3191,12 @@
                         `${item.product.name} (x${item.quantity})`
                     ).join(', ');
                     
+                    // Convertir le montant
+                    const displayAmount = this.convertPrice(sale.amount, 'EUR', currentCurrency);
+                    
                     row.innerHTML = `
                         <td>${formattedDate}</td>
-                        <td>${sale.amount.toFixed(2)} €</td>
+                        <td>${this.formatPrice(displayAmount)}</td>
                         <td>${productsList}</td>
                         <td>${totalProducts}</td>
                     `;
@@ -2987,8 +3221,8 @@
                            (saleDate.getMonth() + 1).toString().padStart(2, '0') == month;
                 });
                 
-                // Calculer les statistiques
-                const totalSales = filteredSales.reduce((total, sale) => total + sale.amount, 0);
+                // Calculer les statistiques en EUR
+                const totalSalesEUR = filteredSales.reduce((total, sale) => total + sale.amount, 0);
                 const transactionsCount = filteredSales.length;
                 
                 // Calculer les jours d'activité
@@ -3003,11 +3237,11 @@
                     salesByDay[sale.date] += sale.amount;
                 });
                 
-                let bestDayAmount = 0;
+                let bestDayAmountEUR = 0;
                 let bestDayDate = '';
                 Object.entries(salesByDay).forEach(([date, amount]) => {
-                    if (amount > bestDayAmount) {
-                        bestDayAmount = amount;
+                    if (amount > bestDayAmountEUR) {
+                        bestDayAmountEUR = amount;
                         bestDayDate = date;
                     }
                 });
@@ -3021,24 +3255,28 @@
                             productSales[productId] = {
                                 name: item.product.name,
                                 quantity: 0,
-                                revenue: 0
+                                revenueEUR: 0
                             };
                         }
                         productSales[productId].quantity += item.quantity;
-                        productSales[productId].revenue += item.product.price * item.quantity;
+                        productSales[productId].revenueEUR += item.product.price * item.quantity;
                     });
                 });
                 
                 // Trier les produits par revenu
                 const topProducts = Object.values(productSales)
-                    .sort((a, b) => b.revenue - a.revenue)
+                    .sort((a, b) => b.revenueEUR - a.revenueEUR)
                     .slice(0, 5);
                 
+                // Convertir en devise d'affichage
+                const totalSales = this.convertPrice(totalSalesEUR, 'EUR', currentCurrency);
+                const bestDayAmount = this.convertPrice(bestDayAmountEUR, 'EUR', currentCurrency);
+                
                 // Mettre à jour l'interface
-                document.getElementById('monthly-total-sales').textContent = `${totalSales.toFixed(2)} €`;
+                document.getElementById('monthly-total-sales').textContent = this.formatPrice(totalSales);
                 document.getElementById('monthly-transactions').textContent = transactionsCount;
                 document.getElementById('monthly-active-days').textContent = activeDays;
-                document.getElementById('monthly-best-day').textContent = `${bestDayAmount.toFixed(2)} €`;
+                document.getElementById('monthly-best-day').textContent = this.formatPrice(bestDayAmount);
                 
                 // Générer le tableau des top produits
                 const topProductsTable = document.getElementById('monthly-top-products');
@@ -3057,10 +3295,12 @@
                 
                 topProducts.forEach(product => {
                     const row = document.createElement('tr');
+                    const displayRevenue = this.convertPrice(product.revenueEUR, 'EUR', currentCurrency);
+                    
                     row.innerHTML = `
                         <td>${product.name}</td>
                         <td>${product.quantity}</td>
-                        <td>${product.revenue.toFixed(2)} €</td>
+                        <td>${this.formatPrice(displayRevenue)}</td>
                     `;
                     topProductsTable.appendChild(row);
                 });
@@ -3075,14 +3315,17 @@
                     return;
                 }
                 
-                // Calculer les statistiques de stock
-                const stockValue = products.reduce((total, product) => total + (product.price * product.stock), 0);
+                // Calculer les statistiques de stock en EUR
+                const stockValueEUR = products.reduce((total, product) => total + (product.price * product.stock), 0);
                 const stockCount = products.length;
                 const outOfStockCount = products.filter(p => p.stock === 0).length;
                 const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length;
                 
+                // Convertir en devise d'affichage
+                const stockValue = this.convertPrice(stockValueEUR, 'EUR', currentCurrency);
+                
                 // Mettre à jour l'interface
-                document.getElementById('stock-report-value').textContent = `${stockValue.toFixed(2)} €`;
+                document.getElementById('stock-report-value').textContent = this.formatPrice(stockValue);
                 document.getElementById('stock-report-count').textContent = stockCount;
                 document.getElementById('stock-report-outofstock').textContent = outOfStockCount;
                 document.getElementById('stock-report-low').textContent = lowStockCount;
