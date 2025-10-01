@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestion des Ventes - Parfums & Cosmétiques</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -36,6 +36,8 @@
             color: var(--dark);
             line-height: 1.6;
             overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .container {
@@ -53,15 +55,16 @@
             min-height: 100vh;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             padding: 20px;
+            overflow-y: auto;
         }
         
         .security-card {
             background-color: white;
-            padding: 30px;
+            padding: 25px 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
             text-align: center;
         }
         
@@ -72,11 +75,13 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            font-size: 1.5rem;
         }
         
         .security-card p {
             color: var(--gray);
             margin-bottom: 25px;
+            font-size: 1rem;
         }
         
         .security-form {
@@ -94,15 +99,17 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--dark);
+            font-size: 0.95rem;
         }
         
         .form-group input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
             transition: var(--transition);
+            -webkit-appearance: none;
         }
         
         .form-group input:focus {
@@ -116,6 +123,7 @@
             border-radius: 8px;
             margin: 10px 0;
             display: none;
+            font-size: 0.9rem;
         }
         
         #securityWarning {
@@ -142,6 +150,8 @@
             z-index: 10000;
             display: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 80%;
+            font-size: 0.95rem;
         }
         
         .toast-success {
@@ -155,13 +165,15 @@
         /* Application Styles */
         #appContainer {
             display: none;
+            height: 100vh;
+            overflow: hidden;
         }
         
         /* Header Styles */
         header {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 15px 20px;
+            padding: 15px 15px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -172,12 +184,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            flex: 1;
+            min-width: 0;
         }
         
         .logo i {
@@ -185,18 +200,23 @@
         }
         
         h1 {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-left: 10px;
         }
         
         .user-info span {
             font-weight: 600;
+            font-size: 0.9rem;
         }
         
         .logout-btn {
@@ -207,6 +227,8 @@
             border-radius: 20px;
             cursor: pointer;
             transition: var(--transition);
+            font-size: 0.85rem;
+            white-space: nowrap;
         }
         
         .logout-btn:hover {
@@ -220,6 +242,9 @@
             background: rgba(255, 255, 255, 0.2);
             padding: 8px 12px;
             border-radius: 20px;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: center;
         }
         
         .date-selector input {
@@ -231,17 +256,27 @@
             width: 140px;
         }
         
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+        }
+        
         /* Stats Section */
         .stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px;
             padding: 15px;
+            background: white;
+            border-bottom: 1px solid var(--gray-light);
         }
         
         .stat-card {
             background-color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             text-align: center;
@@ -254,30 +289,35 @@
         }
         
         .stat-card h3 {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             margin-bottom: 8px;
             color: var(--primary);
         }
         
         .stat-card .value {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--dark);
         }
         
         /* Tabs Navigation */
+        .tabs-container {
+            position: sticky;
+            top: 0;
+            z-index: 99;
+            background: white;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
         .tabs {
             display: flex;
             background-color: white;
             border-radius: 0;
             overflow-x: auto;
             margin-bottom: 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 70px;
-            z-index: 99;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            padding: 0 5px;
         }
         
         .tabs::-webkit-scrollbar {
@@ -285,8 +325,8 @@
         }
         
         .tab {
-            flex: 1;
-            min-width: 120px;
+            flex: 0 0 auto;
+            min-width: 100px;
             padding: 15px 10px;
             text-align: center;
             cursor: pointer;
@@ -294,6 +334,7 @@
             font-weight: 600;
             white-space: nowrap;
             border-bottom: 3px solid transparent;
+            font-size: 0.85rem;
         }
         
         .tab.active {
@@ -303,15 +344,21 @@
         
         .tab i {
             margin-right: 5px;
+            font-size: 0.9rem;
         }
         
         /* Tab Content */
+        .tab-content-container {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
         .tab-content {
             display: none;
             background-color: white;
-            padding: 20px 15px;
-            margin-bottom: 20px;
-            min-height: calc(100vh - 250px);
+            padding: 15px;
+            min-height: 100%;
             overflow-y: auto;
         }
         
@@ -332,7 +379,7 @@
         .product-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 20px;
         }
         
@@ -349,18 +396,23 @@
         
         .product-info {
             flex: 1;
+            min-width: 0;
         }
         
         .product-name {
             font-weight: bold;
             margin-bottom: 5px;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .product-details {
             display: flex;
-            gap: 15px;
-            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.85rem;
             color: var(--gray);
         }
         
@@ -378,17 +430,18 @@
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         
         .product-actions {
             display: flex;
             gap: 8px;
+            margin-left: 10px;
         }
         
         /* Buttons */
         .btn {
-            padding: 10px 15px;
+            padding: 10px 12px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -398,7 +451,8 @@
             align-items: center;
             justify-content: center;
             gap: 5px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            white-space: nowrap;
         }
         
         .btn-block {
@@ -451,20 +505,17 @@
         }
         
         .btn-small {
-            padding: 8px 12px;
-            font-size: 0.85rem;
+            padding: 8px 10px;
+            font-size: 0.8rem;
         }
         
         /* Cart Section */
         .cart {
             background-color: white;
-            padding: 20px 15px;
+            padding: 15px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             margin-bottom: 20px;
-            position: sticky;
-            bottom: 0;
-            background: white;
             border-top: 1px solid var(--gray-light);
         }
         
@@ -474,6 +525,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.2rem;
         }
         
         .cart-items {
@@ -496,25 +548,31 @@
         
         .cart-item-info {
             flex: 1;
+            min-width: 0;
         }
         
         .cart-item-name {
             font-weight: bold;
             margin-bottom: 3px;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .cart-item-details {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--gray);
         }
         
         .cart-item-actions {
             display: flex;
             gap: 5px;
+            margin-left: 10px;
         }
         
         .cart-total {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             text-align: center;
             margin-top: 15px;
@@ -544,6 +602,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: var(--transition);
+            font-size: 0.85rem;
         }
         
         .discount-option.active {
@@ -562,6 +621,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             flex: 1;
+            font-size: 0.9rem;
         }
         
         .payment-section {
@@ -579,6 +639,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
+            font-size: 0.95rem;
         }
         
         .form-group input, .form-group select, .form-group textarea {
@@ -588,6 +649,7 @@
             border-radius: 8px;
             font-size: 1rem;
             transition: var(--transition);
+            -webkit-appearance: none;
         }
         
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -612,11 +674,12 @@
         
         .reservation-info h4 {
             margin-bottom: 5px;
+            font-size: 1rem;
         }
         
         .reservation-info p {
             color: var(--dark);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 5px;
         }
         
@@ -634,6 +697,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 0.9rem;
         }
         
         .alert-warning {
@@ -667,11 +731,12 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            overflow-y: auto;
         }
         
         .modal-content {
             background-color: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: var(--border-radius);
             width: 100%;
             max-width: 500px;
@@ -689,6 +754,7 @@
         
         .modal-header h3 {
             color: var(--primary);
+            font-size: 1.3rem;
         }
         
         .close-modal {
@@ -712,6 +778,113 @@
             color: var(--gray-light);
         }
         
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Stock value display */
+        .stock-value {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        /* Report Styles */
+        .report-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--gray-light);
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+        
+        .report-filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .report-summary-card {
+            background: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .report-summary-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        .report-summary-card .value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+        
+        .report-table th, .report-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .report-table th {
+            background-color: var(--primary-light);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .report-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .report-chart {
+            background: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .chart-placeholder {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-light);
+            border-radius: var(--border-radius);
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .text-success { color: var(--success); }
+        .text-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+        .text-muted { color: var(--gray); font-size: 0.9rem; }
+        
         /* Responsive Adjustments */
         @media (min-width: 768px) {
             .container {
@@ -722,8 +895,26 @@
                 grid-template-columns: repeat(4, 1fr);
             }
             
+            .report-summary {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
             h1 {
                 font-size: 1.6rem;
+            }
+            
+            .header-content {
+                flex-wrap: nowrap;
+            }
+            
+            .date-selector {
+                width: auto;
+                margin-top: 0;
+                margin-left: 10px;
+            }
+            
+            .main-content {
+                height: calc(100vh - 100px);
             }
         }
         
@@ -768,20 +959,91 @@
             background: var(--primary);
         }
         
-        /* Stock value display */
-        .stock-value {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-            font-weight: bold;
+        /* Mobile-specific improvements */
+        @media (max-width: 480px) {
+            .security-card {
+                padding: 20px 15px;
+            }
+            
+            .security-card h1 {
+                font-size: 1.3rem;
+            }
+            
+            .product-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .product-actions {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .product-actions .btn {
+                flex: 1;
+            }
+            
+            .reservation-actions {
+                flex-direction: column;
+            }
+            
+            .payment-section {
+                flex-direction: column;
+            }
+            
+            .discount-options {
+                flex-direction: column;
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .cart-item-actions {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .report-filters {
+                flex-direction: column;
+            }
+            
+            .report-table {
+                font-size: 0.75rem;
+            }
+            
+            .report-table th, .report-table td {
+                padding: 8px 5px;
+            }
         }
         
-        .text-success { color: var(--success); }
-        .text-warning { color: var(--warning); }
-        .text-danger { color: var(--danger); }
-        .text-muted { color: var(--gray); }
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .security-card, .modal-content, .product-item, .cart, .reservation-item {
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+            }
+            
+            input, select, textarea {
+                font-size: 16px !important; /* Prevent zoom on iOS */
+            }
+        }
+        
+        /* Android specific fixes */
+        @supports not (-webkit-touch-callout: none) {
+            .security-card, .modal-content, .product-item, .cart, .reservation-item {
+                backdrop-filter: blur(10px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -830,10 +1092,6 @@
                     <i class="fas fa-spa"></i>
                     <h1>Parfums & Cosmétiques</h1>
                 </div>
-                <div class="date-selector">
-                    <i class="fas fa-calendar-alt"></i>
-                    <input type="date" id="sale-date">
-                </div>
                 <div class="user-info">
                     <span>Balla KONATE</span>
                     <button class="logout-btn" id="lockBtn">
@@ -841,165 +1099,406 @@
                     </button>
                 </div>
             </div>
+            <div class="date-selector">
+                <i class="fas fa-calendar-alt"></i>
+                <input type="date" id="sale-date">
+            </div>
         </header>
         
-        <div class="stats">
-            <div class="stat-card">
-                <h3><i class="fas fa-shopping-bag"></i> Ventes du jour</h3>
-                <div class="value" id="daily-sales">0 €</div>
-            </div>
-            <div class="stat-card">
-                <h3><i class="fas fa-chart-line"></i> Ventes totales</h3>
-                <div class="value" id="total-sales">0 €</div>
-            </div>
-            <div class="stat-card">
-                <h3><i class="fas fa-boxes"></i> Produits en stock</h3>
-                <div class="value" id="total-stock">0</div>
-            </div>
-            <div class="stat-card">
-                <h3><i class="fas fa-coins"></i> Valeur stock</h3>
-                <div class="value" id="stock-value">0 €</div>
-            </div>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" data-tab="stock">
-                <i class="fas fa-store"></i> Vente
-            </div>
-            <div class="tab" data-tab="products">
-                <i class="fas fa-box-open"></i> Gestion Stock
-            </div>
-            <div class="tab" data-tab="reservations">
-                <i class="far fa-calendar-check"></i> Réservations
-            </div>
-            <div class="tab" data-tab="history">
-                <i class="fas fa-history"></i> Historique
-            </div>
-        </div>
-        
-        <!-- Onglet Stock & Vente -->
-        <div class="tab-content active" id="stock-tab">
-            <h2><i class="fas fa-cash-register"></i> Terminal de vente</h2>
-            
-            <div class="product-list" id="product-list">
-                <!-- Les produits seront générés dynamiquement par JavaScript -->
+        <div class="main-content">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3><i class="fas fa-shopping-bag"></i> Ventes du jour</h3>
+                    <div class="value" id="daily-sales">0 €</div>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-chart-line"></i> Ventes totales</h3>
+                    <div class="value" id="total-sales">0 €</div>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-boxes"></i> Produits en stock</h3>
+                    <div class="value" id="total-stock">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-coins"></i> Valeur stock</h3>
+                    <div class="value" id="stock-value">0 €</div>
+                </div>
             </div>
             
-            <div class="cart">
-                <h2><i class="fas fa-shopping-cart"></i> Panier</h2>
-                <div class="cart-items" id="cart-items">
-                    <div class="empty-state">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>Votre panier est vide</p>
-                        <p class="text-muted">Ajoutez des produits pour commencer une vente</p>
+            <div class="tabs-container">
+                <div class="tabs">
+                    <div class="tab active" data-tab="stock">
+                        <i class="fas fa-store"></i> Vente
+                    </div>
+                    <div class="tab" data-tab="products">
+                        <i class="fas fa-box-open"></i> Stock
+                    </div>
+                    <div class="tab" data-tab="reservations">
+                        <i class="far fa-calendar-check"></i> Réservations
+                    </div>
+                    <div class="tab" data-tab="history">
+                        <i class="fas fa-history"></i> Historique
+                    </div>
+                    <div class="tab" data-tab="global-sales">
+                        <i class="fas fa-list"></i> Ventes Globales
+                    </div>
+                    <div class="tab" data-tab="monthly-report">
+                        <i class="fas fa-chart-bar"></i> Rapport Mensuel
+                    </div>
+                    <div class="tab" data-tab="stock-report">
+                        <i class="fas fa-chart-line"></i> Stock Mensuel
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content-container">
+                <!-- Onglet Stock & Vente -->
+                <div class="tab-content active" id="stock-tab">
+                    <h2><i class="fas fa-cash-register"></i> Terminal de vente</h2>
+                    
+                    <div class="product-list" id="product-list">
+                        <!-- Les produits seront générés dynamiquement par JavaScript -->
+                    </div>
+                    
+                    <div class="cart">
+                        <h2><i class="fas fa-shopping-cart"></i> Panier</h2>
+                        <div class="cart-items" id="cart-items">
+                            <div class="empty-state">
+                                <i class="fas fa-shopping-cart"></i>
+                                <p>Votre panier est vide</p>
+                                <p class="text-muted">Ajoutez des produits pour commencer une vente</p>
+                            </div>
+                        </div>
+                        
+                        <div class="discount-section">
+                            <div class="discount-options">
+                                <div class="discount-option active" data-type="global">
+                                    <i class="fas fa-percentage"></i> Remise globale
+                                </div>
+                                <div class="discount-option" data-type="individual">
+                                    <i class="fas fa-tag"></i> Remise individuelle
+                                </div>
+                            </div>
+                            
+                            <div class="discount-input">
+                                <input type="number" id="global-discount" min="0" max="100" placeholder="0">
+                                <span>%</span>
+                                <button class="btn btn-secondary btn-small" id="apply-discount">Appliquer</button>
+                            </div>
+                        </div>
+                        
+                        <div class="cart-total">
+                            Total : <span id="cart-total">0.00 €</span>
+                        </div>
+                        
+                        <div class="payment-section">
+                            <button class="btn btn-success btn-block" id="validate-payment">
+                                <i class="fas fa-check-circle"></i> Valider le paiement
+                            </button>
+                            <button class="btn btn-danger" id="clear-cart">
+                                <i class="fas fa-trash"></i> Vider
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="discount-section">
-                    <div class="discount-options">
-                        <div class="discount-option active" data-type="global">
-                            <i class="fas fa-percentage"></i> Remise globale
-                        </div>
-                        <div class="discount-option" data-type="individual">
-                            <i class="fas fa-tag"></i> Remise individuelle
+                <!-- Onglet Gestion des Produits -->
+                <div class="tab-content" id="products-tab">
+                    <h2><i class="fas fa-box-open"></i> Gestion du stock</h2>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Stock mis à jour automatiquement</strong> - Les quantités sont ajustées après chaque vente
                         </div>
                     </div>
                     
-                    <div class="discount-input">
-                        <input type="number" id="global-discount" min="0" max="100" placeholder="0">
-                        <span>%</span>
-                        <button class="btn btn-secondary btn-small" id="apply-discount">Appliquer</button>
+                    <button class="btn btn-primary btn-block" id="add-product-btn" style="margin-bottom: 20px;">
+                        <i class="fas fa-plus-circle"></i> Ajouter un nouveau produit
+                    </button>
+                    
+                    <div class="product-list" id="stock-product-list">
+                        <!-- Les produits en stock seront générés dynamiquement -->
+                    </div>
+                    
+                    <div class="stock-value">
+                        <span>Valeur totale du stock :</span>
+                        <span id="total-stock-value">0 €</span>
                     </div>
                 </div>
                 
-                <div class="cart-total">
-                    Total : <span id="cart-total">0.00 €</span>
+                <!-- Onglet Réservations -->
+                <div class="tab-content" id="reservations-tab">
+                    <h2><i class="far fa-calendar-check"></i> Gestion des réservations</h2>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Rappel automatique</strong> - Vous recevrez une alerte pour les réservations en attente
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reservation-product">Produit à réserver :</label>
+                        <select id="reservation-product">
+                            <!-- Les options seront remplies par JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="client-phone">Numéro de téléphone du client :</label>
+                        <input type="tel" id="client-phone" placeholder="Ex: 06 12 34 56 78">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reservation-notes">Notes (optionnel) :</label>
+                        <textarea id="reservation-notes" rows="2" placeholder="Informations supplémentaires sur le client ou la réservation"></textarea>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-block" id="add-reservation">
+                        <i class="fas fa-plus-circle"></i> Ajouter la réservation
+                    </button>
+                    
+                    <div class="reservations-list" id="reservations-list">
+                        <!-- Les réservations seront générées dynamiquement -->
+                    </div>
                 </div>
                 
-                <div class="payment-section">
-                    <button class="btn btn-success btn-block" id="validate-payment">
-                        <i class="fas fa-check-circle"></i> Valider le paiement
-                    </button>
-                    <button class="btn btn-danger" id="clear-cart">
-                        <i class="fas fa-trash"></i> Vider
-                    </button>
+                <!-- Onglet Historique -->
+                <div class="tab-content" id="history-tab">
+                    <h2><i class="fas fa-history"></i> Historique des ventes</h2>
+                    
+                    <div class="form-group">
+                        <label for="history-filter">Filtrer par date :</label>
+                        <input type="date" id="history-filter">
+                    </div>
+                    
+                    <div id="sales-history">
+                        <!-- L'historique sera généré dynamiquement -->
+                    </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Onglet Gestion des Produits -->
-        <div class="tab-content" id="products-tab">
-            <h2><i class="fas fa-box-open"></i> Gestion du stock</h2>
-            
-            <div class="alert alert-success">
-                <i class="fas fa-info-circle"></i>
-                <div>
-                    <strong>Stock mis à jour automatiquement</strong> - Les quantités sont ajustées après chaque vente
+                
+                <!-- Onglet Ventes Globales -->
+                <div class="tab-content" id="global-sales-tab">
+                    <h2><i class="fas fa-list"></i> Ventes Globales</h2>
+                    
+                    <div class="report-filters">
+                        <div class="report-filter-group">
+                            <label for="global-start-date">Date de début :</label>
+                            <input type="date" id="global-start-date">
+                        </div>
+                        <div class="report-filter-group">
+                            <label for="global-end-date">Date de fin :</label>
+                            <input type="date" id="global-end-date">
+                        </div>
+                        <div class="report-filter-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary btn-block" id="apply-global-filter">
+                                <i class="fas fa-filter"></i> Appliquer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-summary">
+                        <div class="report-summary-card">
+                            <h3>Total des ventes</h3>
+                            <div class="value" id="global-total-sales">0 €</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Nombre de transactions</h3>
+                            <div class="value" id="global-transactions">0</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Produits vendus</h3>
+                            <div class="value" id="global-products-sold">0</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Panier moyen</h3>
+                            <div class="value" id="global-average-cart">0 €</div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-chart">
+                        <h3>Évolution des ventes</h3>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-line"></i> Graphique d'évolution des ventes
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px;">Détail des ventes</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Montant</th>
+                                    <th>Produits</th>
+                                    <th>Quantité</th>
+                                </tr>
+                            </thead>
+                            <tbody id="global-sales-details">
+                                <!-- Les détails seront générés dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-            
-            <button class="btn btn-primary btn-block" id="add-product-btn" style="margin-bottom: 20px;">
-                <i class="fas fa-plus-circle"></i> Ajouter un nouveau produit
-            </button>
-            
-            <div class="product-list" id="stock-product-list">
-                <!-- Les produits en stock seront générés dynamiquement -->
-            </div>
-            
-            <div class="stock-value">
-                <span>Valeur totale du stock :</span>
-                <span id="total-stock-value">0 €</span>
-            </div>
-        </div>
-        
-        <!-- Onglet Réservations -->
-        <div class="tab-content" id="reservations-tab">
-            <h2><i class="far fa-calendar-check"></i> Gestion des réservations</h2>
-            
-            <div class="alert alert-warning">
-                <i class="fas fa-info-circle"></i>
-                <div>
-                    <strong>Rappel automatique</strong> - Vous recevrez une alerte pour les réservations en attente
+                
+                <!-- Onglet Rapport Mensuel -->
+                <div class="tab-content" id="monthly-report-tab">
+                    <h2><i class="fas fa-chart-bar"></i> Rapport Mensuel des Ventes</h2>
+                    
+                    <div class="report-filters">
+                        <div class="report-filter-group">
+                            <label for="monthly-year">Année :</label>
+                            <select id="monthly-year">
+                                <!-- Les années seront générées dynamiquement -->
+                            </select>
+                        </div>
+                        <div class="report-filter-group">
+                            <label for="monthly-month">Mois :</label>
+                            <select id="monthly-month">
+                                <option value="01">Janvier</option>
+                                <option value="02">Février</option>
+                                <option value="03">Mars</option>
+                                <option value="04">Avril</option>
+                                <option value="05">Mai</option>
+                                <option value="06">Juin</option>
+                                <option value="07">Juillet</option>
+                                <option value="08">Août</option>
+                                <option value="09">Septembre</option>
+                                <option value="10">Octobre</option>
+                                <option value="11">Novembre</option>
+                                <option value="12">Décembre</option>
+                            </select>
+                        </div>
+                        <div class="report-filter-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary btn-block" id="apply-monthly-filter">
+                                <i class="fas fa-filter"></i> Appliquer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-summary">
+                        <div class="report-summary-card">
+                            <h3>Ventes du mois</h3>
+                            <div class="value" id="monthly-total-sales">0 €</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Transactions</h3>
+                            <div class="value" id="monthly-transactions">0</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Jours d'activité</h3>
+                            <div class="value" id="monthly-active-days">0</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Meilleur jour</h3>
+                            <div class="value" id="monthly-best-day">0 €</div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-chart">
+                        <h3>Ventes par jour</h3>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-bar"></i> Graphique des ventes par jour
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px;">Top produits du mois</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Quantité vendue</th>
+                                    <th>Chiffre d'affaires</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-top-products">
+                                <!-- Les top produits seront générés dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="reservation-product">Produit à réserver :</label>
-                <select id="reservation-product">
-                    <!-- Les options seront remplies par JavaScript -->
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="client-phone">Numéro de téléphone du client :</label>
-                <input type="tel" id="client-phone" placeholder="Ex: 06 12 34 56 78">
-            </div>
-            
-            <div class="form-group">
-                <label for="reservation-notes">Notes (optionnel) :</label>
-                <textarea id="reservation-notes" rows="2" placeholder="Informations supplémentaires sur le client ou la réservation"></textarea>
-            </div>
-            
-            <button class="btn btn-primary btn-block" id="add-reservation">
-                <i class="fas fa-plus-circle"></i> Ajouter la réservation
-            </button>
-            
-            <div class="reservations-list" id="reservations-list">
-                <!-- Les réservations seront générées dynamiquement -->
-            </div>
-        </div>
-        
-        <!-- Onglet Historique -->
-        <div class="tab-content" id="history-tab">
-            <h2><i class="fas fa-history"></i> Historique des ventes</h2>
-            
-            <div class="form-group">
-                <label for="history-filter">Filtrer par date :</label>
-                <input type="date" id="history-filter">
-            </div>
-            
-            <div id="sales-history">
-                <!-- L'historique sera généré dynamiquement -->
+                
+                <!-- Onglet Rapport des Stocks -->
+                <div class="tab-content" id="stock-report-tab">
+                    <h2><i class="fas fa-chart-line"></i> Rapport des Niveaux de Stocks</h2>
+                    
+                    <div class="report-filters">
+                        <div class="report-filter-group">
+                            <label for="stock-year">Année :</label>
+                            <select id="stock-year">
+                                <!-- Les années seront générées dynamiquement -->
+                            </select>
+                        </div>
+                        <div class="report-filter-group">
+                            <label for="stock-month">Mois :</label>
+                            <select id="stock-month">
+                                <option value="01">Janvier</option>
+                                <option value="02">Février</option>
+                                <option value="03">Mars</option>
+                                <option value="04">Avril</option>
+                                <option value="05">Mai</option>
+                                <option value="06">Juin</option>
+                                <option value="07">Juillet</option>
+                                <option value="08">Août</option>
+                                <option value="09">Septembre</option>
+                                <option value="10">Octobre</option>
+                                <option value="11">Novembre</option>
+                                <option value="12">Décembre</option>
+                            </select>
+                        </div>
+                        <div class="report-filter-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary btn-block" id="apply-stock-filter">
+                                <i class="fas fa-filter"></i> Appliquer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-summary">
+                        <div class="report-summary-card">
+                            <h3>Valeur du stock</h3>
+                            <div class="value" id="stock-report-value">0 €</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Produits en stock</h3>
+                            <div class="value" id="stock-report-count">0</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Ruptures de stock</h3>
+                            <div class="value" id="stock-report-outofstock">0</div>
+                        </div>
+                        <div class="report-summary-card">
+                            <h3>Stock faible</h3>
+                            <div class="value" id="stock-report-low">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-chart">
+                        <h3>Évolution du stock</h3>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-area"></i> Graphique d'évolution du stock
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px;">Détail des stocks</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Stock actuel</th>
+                                    <th>Stock début mois</th>
+                                    <th>Ventes du mois</th>
+                                    <th>Variation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-report-details">
+                                <!-- Les détails seront générés dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1278,6 +1777,7 @@
                 document.addEventListener('mousemove', resetTimer);
                 document.addEventListener('keypress', resetTimer);
                 document.addEventListener('click', resetTimer);
+                document.addEventListener('touchstart', resetTimer);
                 
                 resetTimer();
             },
@@ -1349,6 +1849,9 @@
                 const historyFilter = document.getElementById('history-filter');
                 if (historyFilter) historyFilter.value = today;
                 
+                // Initialiser les dates pour les rapports
+                this.initReportDates();
+                
                 // Charger les données depuis le localStorage si disponibles
                 this.loadData();
                 
@@ -1364,6 +1867,56 @@
                 
                 // Vérifier les réservations pour les alertes
                 this.checkReservationAlerts();
+                
+                // Générer les rapports initiaux
+                this.generateGlobalSalesReport();
+                this.generateMonthlyReport();
+                this.generateStockReport();
+            },
+            
+            initReportDates() {
+                // Initialiser les dates pour les rapports globaux
+                const now = new Date();
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+                
+                const globalStartDate = document.getElementById('global-start-date');
+                const globalEndDate = document.getElementById('global-end-date');
+                if (globalStartDate) globalStartDate.value = firstDay;
+                if (globalEndDate) globalEndDate.value = lastDay;
+                
+                // Initialiser les sélecteurs d'année
+                const currentYear = now.getFullYear();
+                const yearSelectors = [
+                    document.getElementById('monthly-year'),
+                    document.getElementById('stock-year')
+                ];
+                
+                yearSelectors.forEach(selector => {
+                    if (selector) {
+                        // Ajouter les 5 dernières années
+                        for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+                            const option = document.createElement('option');
+                            option.value = i;
+                            option.textContent = i;
+                            if (i === currentYear) option.selected = true;
+                            selector.appendChild(option);
+                        }
+                    }
+                });
+                
+                // Initialiser le sélecteur de mois avec le mois actuel
+                const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+                const monthSelectors = [
+                    document.getElementById('monthly-month'),
+                    document.getElementById('stock-month')
+                ];
+                
+                monthSelectors.forEach(selector => {
+                    if (selector) {
+                        selector.value = currentMonth;
+                    }
+                });
             },
             
             loadData() {
@@ -1721,12 +2274,37 @@
                     });
                 }
                 
+                // Rapports
+                const applyGlobalFilterBtn = document.getElementById('apply-global-filter');
+                if (applyGlobalFilterBtn) {
+                    applyGlobalFilterBtn.addEventListener('click', function() {
+                        app.generateGlobalSalesReport();
+                    });
+                }
+                
+                const applyMonthlyFilterBtn = document.getElementById('apply-monthly-filter');
+                if (applyMonthlyFilterBtn) {
+                    applyMonthlyFilterBtn.addEventListener('click', function() {
+                        app.generateMonthlyReport();
+                    });
+                }
+                
+                const applyStockFilterBtn = document.getElementById('apply-stock-filter');
+                if (applyStockFilterBtn) {
+                    applyStockFilterBtn.addEventListener('click', function() {
+                        app.generateStockReport();
+                    });
+                }
+                
                 // Fermer les modales en cliquant à l'extérieur
                 window.addEventListener('click', function(e) {
                     if (e.target.classList.contains('modal')) {
                         e.target.style.display = 'none';
                     }
                 });
+                
+                // Gestion des événements tactiles pour mobile
+                document.addEventListener('touchstart', function() {}, {passive: true});
             },
             
             addToCart(productId) {
@@ -1936,6 +2514,11 @@
                 this.renderStockProducts();
                 this.updateStats();
                 this.saveData();
+                
+                // Regénérer les rapports
+                this.generateGlobalSalesReport();
+                this.generateMonthlyReport();
+                this.generateStockReport();
             },
             
             addReservation() {
@@ -2292,6 +2875,233 @@
                         alert('Produit supprimé avec succès !');
                     }
                 }
+            },
+            
+            // =============================================
+            // RAPPORTS AVANCÉS
+            // =============================================
+            
+            generateGlobalSalesReport() {
+                const startDate = document.getElementById('global-start-date').value;
+                const endDate = document.getElementById('global-end-date').value;
+                
+                if (!startDate || !endDate) {
+                    alert('Veuillez sélectionner une période valide.');
+                    return;
+                }
+                
+                // Filtrer les ventes par période
+                const filteredSales = salesHistory.filter(sale => 
+                    sale.date >= startDate && sale.date <= endDate
+                );
+                
+                // Calculer les statistiques
+                const totalSales = filteredSales.reduce((total, sale) => total + sale.amount, 0);
+                const transactionsCount = filteredSales.length;
+                const productsSold = filteredSales.reduce((total, sale) => 
+                    total + sale.items.reduce((sum, item) => sum + item.quantity, 0), 0
+                );
+                const averageCart = transactionsCount > 0 ? totalSales / transactionsCount : 0;
+                
+                // Mettre à jour l'interface
+                document.getElementById('global-total-sales').textContent = `${totalSales.toFixed(2)} €`;
+                document.getElementById('global-transactions').textContent = transactionsCount;
+                document.getElementById('global-products-sold').textContent = productsSold;
+                document.getElementById('global-average-cart').textContent = `${averageCart.toFixed(2)} €`;
+                
+                // Générer le tableau des détails
+                const detailsTable = document.getElementById('global-sales-details');
+                detailsTable.innerHTML = '';
+                
+                if (filteredSales.length === 0) {
+                    detailsTable.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 20px;">
+                                Aucune vente dans cette période
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                filteredSales.forEach(sale => {
+                    const row = document.createElement('tr');
+                    
+                    // Formater la date
+                    const dateObj = new Date(sale.date);
+                    const formattedDate = dateObj.toLocaleDateString('fr-FR');
+                    
+                    // Compter le nombre total de produits
+                    const totalProducts = sale.items.reduce((sum, item) => sum + item.quantity, 0);
+                    
+                    // Lister les produits
+                    const productsList = sale.items.map(item => 
+                        `${item.product.name} (x${item.quantity})`
+                    ).join(', ');
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${sale.amount.toFixed(2)} €</td>
+                        <td>${productsList}</td>
+                        <td>${totalProducts}</td>
+                    `;
+                    
+                    detailsTable.appendChild(row);
+                });
+            },
+            
+            generateMonthlyReport() {
+                const year = document.getElementById('monthly-year').value;
+                const month = document.getElementById('monthly-month').value;
+                
+                if (!year || !month) {
+                    alert('Veuillez sélectionner une année et un mois.');
+                    return;
+                }
+                
+                // Filtrer les ventes par mois
+                const filteredSales = salesHistory.filter(sale => {
+                    const saleDate = new Date(sale.date);
+                    return saleDate.getFullYear() == year && 
+                           (saleDate.getMonth() + 1).toString().padStart(2, '0') == month;
+                });
+                
+                // Calculer les statistiques
+                const totalSales = filteredSales.reduce((total, sale) => total + sale.amount, 0);
+                const transactionsCount = filteredSales.length;
+                
+                // Calculer les jours d'activité
+                const activeDays = new Set(filteredSales.map(sale => sale.date)).size;
+                
+                // Trouver le meilleur jour
+                const salesByDay = {};
+                filteredSales.forEach(sale => {
+                    if (!salesByDay[sale.date]) {
+                        salesByDay[sale.date] = 0;
+                    }
+                    salesByDay[sale.date] += sale.amount;
+                });
+                
+                let bestDayAmount = 0;
+                let bestDayDate = '';
+                Object.entries(salesByDay).forEach(([date, amount]) => {
+                    if (amount > bestDayAmount) {
+                        bestDayAmount = amount;
+                        bestDayDate = date;
+                    }
+                });
+                
+                // Calculer les produits les plus vendus
+                const productSales = {};
+                filteredSales.forEach(sale => {
+                    sale.items.forEach(item => {
+                        const productId = item.product.id;
+                        if (!productSales[productId]) {
+                            productSales[productId] = {
+                                name: item.product.name,
+                                quantity: 0,
+                                revenue: 0
+                            };
+                        }
+                        productSales[productId].quantity += item.quantity;
+                        productSales[productId].revenue += item.product.price * item.quantity;
+                    });
+                });
+                
+                // Trier les produits par revenu
+                const topProducts = Object.values(productSales)
+                    .sort((a, b) => b.revenue - a.revenue)
+                    .slice(0, 5);
+                
+                // Mettre à jour l'interface
+                document.getElementById('monthly-total-sales').textContent = `${totalSales.toFixed(2)} €`;
+                document.getElementById('monthly-transactions').textContent = transactionsCount;
+                document.getElementById('monthly-active-days').textContent = activeDays;
+                document.getElementById('monthly-best-day').textContent = `${bestDayAmount.toFixed(2)} €`;
+                
+                // Générer le tableau des top produits
+                const topProductsTable = document.getElementById('monthly-top-products');
+                topProductsTable.innerHTML = '';
+                
+                if (topProducts.length === 0) {
+                    topProductsTable.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 20px;">
+                                Aucune vente ce mois-ci
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                topProducts.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${product.quantity}</td>
+                        <td>${product.revenue.toFixed(2)} €</td>
+                    `;
+                    topProductsTable.appendChild(row);
+                });
+            },
+            
+            generateStockReport() {
+                const year = document.getElementById('stock-year').value;
+                const month = document.getElementById('stock-month').value;
+                
+                if (!year || !month) {
+                    alert('Veuillez sélectionner une année et un mois.');
+                    return;
+                }
+                
+                // Calculer les statistiques de stock
+                const stockValue = products.reduce((total, product) => total + (product.price * product.stock), 0);
+                const stockCount = products.length;
+                const outOfStockCount = products.filter(p => p.stock === 0).length;
+                const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+                
+                // Mettre à jour l'interface
+                document.getElementById('stock-report-value').textContent = `${stockValue.toFixed(2)} €`;
+                document.getElementById('stock-report-count').textContent = stockCount;
+                document.getElementById('stock-report-outofstock').textContent = outOfStockCount;
+                document.getElementById('stock-report-low').textContent = lowStockCount;
+                
+                // Générer le tableau des détails
+                const detailsTable = document.getElementById('stock-report-details');
+                detailsTable.innerHTML = '';
+                
+                if (products.length === 0) {
+                    detailsTable.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px;">
+                                Aucun produit en stock
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Pour cet exemple, nous n'avons pas d'historique de stock, donc nous utilisons les données actuelles
+                products.forEach(product => {
+                    const row = document.createElement('tr');
+                    const stockStatus = product.stock > 5 ? 'text-success' : 
+                                       (product.stock > 0 ? 'text-warning' : 'text-danger');
+                    
+                    // Dans une application réelle, vous auriez un historique des stocks
+                    // Pour cet exemple, nous utilisons des valeurs simulées
+                    const startStock = Math.min(product.stock + Math.floor(Math.random() * 10), 50);
+                    const monthlySales = startStock - product.stock;
+                    const variation = monthlySales > 0 ? `-${monthlySales}` : `+${Math.abs(monthlySales)}`;
+                    
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td class="${stockStatus}">${product.stock}</td>
+                        <td>${startStock}</td>
+                        <td>${monthlySales > 0 ? monthlySales : 0}</td>
+                        <td>${variation}</td>
+                    `;
+                    detailsTable.appendChild(row);
+                });
             }
         };
 
