@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion des Ventes - Parfums & Cosmétiques</title>
+    <title>Perfumeria KONATE - Gestion des ventes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -201,7 +201,7 @@
         
         .app-title {
             font-size: 1.2rem;
-            font-weight: 600;
+            font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -236,6 +236,96 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
+        /* Hamburger Menu */
+        .hamburger-menu {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .hamburger-menu span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: white;
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+        
+        /* Navigation Drawer */
+        .nav-drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: var(--transition);
+            overflow-y: auto;
+            padding-top: 60px;
+        }
+        
+        .nav-drawer.active {
+            left: 0;
+        }
+        
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .nav-overlay.active {
+            display: block;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-item {
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(142, 68, 173, 0.1);
+            color: var(--primary);
+        }
+        
+        .nav-link.active {
+            border-left: 4px solid var(--primary);
+        }
+        
         .date-selector {
             display: flex;
             align-items: center;
@@ -245,6 +335,7 @@
             border-radius: 20px;
             width: 100%;
             justify-content: center;
+            margin-bottom: 8px;
         }
         
         .date-selector input {
@@ -261,7 +352,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            margin-top: 8px;
+            justify-content: center;
         }
         
         .currency-btn {
@@ -284,8 +375,37 @@
         .main-content {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 140px);
+            height: calc(100vh - 150px);
             overflow: hidden;
+        }
+        
+        /* Search Bar */
+        .search-container {
+            padding: 12px 15px;
+            background: white;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .search-box button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 15px;
+            cursor: pointer;
         }
         
         /* Stats Section */
@@ -313,24 +433,25 @@
         }
         
         .stat-card h3 {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             margin-bottom: 8px;
             color: var(--primary);
         }
         
         .stat-card .value {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--dark);
         }
         
-        /* Tabs Navigation */
+        /* Tabs Navigation - Hidden on mobile, shown on desktop */
         .tabs-container {
             position: sticky;
             top: 0;
             z-index: 99;
             background: white;
             border-bottom: 1px solid var(--gray-light);
+            display: none;
         }
         
         .tabs {
@@ -358,7 +479,7 @@
             font-weight: 600;
             white-space: nowrap;
             border-bottom: 3px solid transparent;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         
         .tab.active {
@@ -394,7 +515,7 @@
         .tab-content h2 {
             margin-bottom: 15px;
             color: var(--primary);
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -427,7 +548,7 @@
         .product-name {
             font-weight: bold;
             margin-bottom: 5px;
-            font-size: 1rem;
+            font-size: 1.05rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -530,6 +651,15 @@
             background-color: #e0a800;
         }
         
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        
         .btn-small {
             padding: 8px 10px;
             font-size: 0.8rem;
@@ -551,7 +681,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
         
         .cart-items {
@@ -994,6 +1124,29 @@
             font-size: 0.8rem;
         }
         
+        /* Low Stock Warning */
+        .low-stock-warning {
+            color: var(--danger);
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Data Management */
+        .data-management {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .data-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
         /* Responsive Adjustments */
         @media (min-width: 768px) {
             .container {
@@ -1009,7 +1162,7 @@
             }
             
             .app-title {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
             }
             
             .header-top {
@@ -1026,6 +1179,13 @@
                 width: auto;
                 margin-top: 0;
                 margin-left: 10px;
+                margin-bottom: 0;
+            }
+            
+            .currency-selector {
+                margin-top: 0;
+                margin-left: 10px;
+                justify-content: flex-start;
             }
             
             .main-content {
@@ -1064,9 +1224,25 @@
                 min-width: auto;
             }
             
-            .currency-selector {
-                margin-top: 0;
-                margin-left: 10px;
+            .data-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .hamburger-menu {
+                display: none;
+            }
+            
+            .nav-drawer {
+                display: none; /* Supprimé en mode desktop */
+            }
+            
+            .nav-overlay {
+                display: none !important;
+            }
+            
+            /* Show tabs on desktop */
+            .tabs-container {
+                display: block;
             }
         }
         
@@ -1148,6 +1324,14 @@
             .report-table th, .report-table td {
                 padding: 8px 5px;
             }
+            
+            .tab-content h2 {
+                font-size: 1.3rem;
+            }
+            
+            .stat-card .value {
+                font-size: 1.2rem;
+            }
         }
         
         /* iOS specific fixes */
@@ -1213,8 +1397,13 @@
         <header>
             <div class="header-top">
                 <div class="logo">
+                    <div class="hamburger-menu" id="hamburgerMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                     <i class="fas fa-spa"></i>
-                    <div class="app-title">Parfums & Cosmétiques</div>
+                    <div class="app-title">Perfumeria KONATE</div>
                 </div>
                 <div class="user-controls">
                     <div class="user-info">Balla KONATE</div>
@@ -1232,6 +1421,65 @@
                 <button class="currency-btn" data-currency="PLN">PLN</button>
             </div>
         </header>
+        
+        <!-- Navigation Menu -->
+        <div class="nav-overlay" id="navOverlay"></div>
+        <nav class="nav-drawer" id="navDrawer">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-tab="stock">
+                        <i class="fas fa-cash-register"></i> Vente
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="products">
+                        <i class="fas fa-box-open"></i> Stock
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="low-stock">
+                        <i class="fas fa-exclamation-triangle"></i> Stock Faible
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="reservations">
+                        <i class="far fa-calendar-check"></i> Réservations
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="history">
+                        <i class="fas fa-history"></i> Historique
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="global-sales">
+                        <i class="fas fa-list"></i> Ventes Globales
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="monthly-report">
+                        <i class="fas fa-chart-bar"></i> Rapport Mensuel
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="monthly-stock">
+                        <i class="fas fa-chart-line"></i> Stock Mensuel
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="data-management">
+                        <i class="fas fa-database"></i> Données
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Rechercher un produit...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
         
         <div class="main-content">
             <div class="stats">
@@ -1253,13 +1501,17 @@
                 </div>
             </div>
             
+            <!-- Tabs Navigation - Hidden on mobile, shown on desktop -->
             <div class="tabs-container">
                 <div class="tabs">
                     <div class="tab active" data-tab="stock">
-                        <i class="fas fa-store"></i> Vente
+                        <i class="fas fa-cash-register"></i> Vente
                     </div>
                     <div class="tab" data-tab="products">
                         <i class="fas fa-box-open"></i> Stock
+                    </div>
+                    <div class="tab" data-tab="low-stock">
+                        <i class="fas fa-exclamation-triangle"></i> Stock Faible
                     </div>
                     <div class="tab" data-tab="reservations">
                         <i class="far fa-calendar-check"></i> Réservations
@@ -1273,8 +1525,11 @@
                     <div class="tab" data-tab="monthly-report">
                         <i class="fas fa-chart-bar"></i> Rapport Mensuel
                     </div>
-                    <div class="tab" data-tab="stock-report">
+                    <div class="tab" data-tab="monthly-stock">
                         <i class="fas fa-chart-line"></i> Stock Mensuel
+                    </div>
+                    <div class="tab" data-tab="data-management">
+                        <i class="fas fa-database"></i> Données
                     </div>
                 </div>
             </div>
@@ -1355,6 +1610,22 @@
                     </div>
                 </div>
                 
+                <!-- Onglet Stock Faible -->
+                <div class="tab-content" id="low-stock-tab">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Stock Faible</h2>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Seuil d'alerte personnalisé</strong> - Les produits avec un stock inférieur à leur seuil d'alerte sont listés ici
+                        </div>
+                    </div>
+                    
+                    <div class="product-list" id="low-stock-list">
+                        <!-- Les produits en stock faible seront générés dynamiquement -->
+                    </div>
+                </div>
+                
                 <!-- Onglet Réservations -->
                 <div class="tab-content" id="reservations-tab">
                     <h2><i class="far fa-calendar-check"></i> Gestion des réservations</h2>
@@ -1399,6 +1670,12 @@
                     <div class="form-group">
                         <label for="history-filter">Filtrer par date :</label>
                         <input type="date" id="history-filter">
+                    </div>
+                    
+                    <div class="payment-section" style="margin-bottom: 15px;">
+                        <button class="btn btn-danger" id="delete-today-sales">
+                            <i class="fas fa-trash"></i> Supprimer les ventes du jour
+                        </button>
                     </div>
                     
                     <div id="sales-history">
@@ -1548,20 +1825,20 @@
                     </div>
                 </div>
                 
-                <!-- Onglet Rapport des Stocks -->
-                <div class="tab-content" id="stock-report-tab">
-                    <h2><i class="fas fa-chart-line"></i> Rapport des Niveaux de Stocks</h2>
+                <!-- Onglet Stock Mensuel -->
+                <div class="tab-content" id="monthly-stock-tab">
+                    <h2><i class="fas fa-chart-line"></i> Évolution du Stock Mensuel</h2>
                     
                     <div class="report-filters">
                         <div class="report-filter-group">
-                            <label for="stock-year">Année :</label>
-                            <select id="stock-year">
+                            <label for="stock-monthly-year">Année :</label>
+                            <select id="stock-monthly-year">
                                 <!-- Les années seront générées dynamiquement -->
                             </select>
                         </div>
                         <div class="report-filter-group">
-                            <label for="stock-month">Mois :</label>
-                            <select id="stock-month">
+                            <label for="stock-monthly-month">Mois :</label>
+                            <select id="stock-monthly-month">
                                 <option value="01">Janvier</option>
                                 <option value="02">Février</option>
                                 <option value="03">Mars</option>
@@ -1577,7 +1854,7 @@
                             </select>
                         </div>
                         <div class="report-filter-group" style="display: flex; align-items: flex-end;">
-                            <button class="btn btn-primary btn-block" id="apply-stock-filter">
+                            <button class="btn btn-primary btn-block" id="apply-stock-monthly-filter">
                                 <i class="fas fa-filter"></i> Appliquer
                             </button>
                         </div>
@@ -1585,46 +1862,87 @@
                     
                     <div class="report-summary">
                         <div class="report-summary-card">
-                            <h3>Valeur du stock</h3>
-                            <div class="value" id="stock-report-value">0 €</div>
+                            <h3>Stock initial</h3>
+                            <div class="value" id="monthly-initial-stock">0</div>
                         </div>
                         <div class="report-summary-card">
-                            <h3>Produits en stock</h3>
-                            <div class="value" id="stock-report-count">0</div>
+                            <h3>Stock final</h3>
+                            <div class="value" id="monthly-final-stock">0</div>
                         </div>
                         <div class="report-summary-card">
-                            <h3>Ruptures de stock</h3>
-                            <div class="value" id="stock-report-outofstock">0</div>
+                            <h3>Produits vendus</h3>
+                            <div class="value" id="monthly-products-sold">0</div>
                         </div>
                         <div class="report-summary-card">
-                            <h3>Stock faible</h3>
-                            <div class="value" id="stock-report-low">0</div>
+                            <h3>Rotation</h3>
+                            <div class="value" id="monthly-stock-turnover">0%</div>
                         </div>
                     </div>
                     
                     <div class="report-chart">
                         <h3>Évolution du stock</h3>
                         <div class="chart-placeholder">
-                            <i class="fas fa-chart-area"></i> Graphique d'évolution du stock
+                            <i class="fas fa-chart-line"></i> Graphique d'évolution du stock
                         </div>
                     </div>
                     
-                    <h3 style="margin-top: 20px;">Détail des stocks</h3>
+                    <h3 style="margin-top: 20px;">Détail du stock par produit</h3>
                     <div class="report-table-container">
                         <table class="report-table">
                             <thead>
                                 <tr>
                                     <th>Produit</th>
-                                    <th>Stock actuel</th>
-                                    <th>Stock début mois</th>
-                                    <th>Ventes du mois</th>
-                                    <th>Variation</th>
+                                    <th>Stock initial</th>
+                                    <th>Entrées</th>
+                                    <th>Sorties</th>
+                                    <th>Stock final</th>
                                 </tr>
                             </thead>
-                            <tbody id="stock-report-details">
-                                <!-- Les détails seront générés dynamiquement -->
+                            <tbody id="monthly-stock-details">
+                                <!-- Les détails du stock seront générés dynamiquement -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <!-- Onglet Gestion des Données -->
+                <div class="tab-content" id="data-management-tab">
+                    <h2><i class="fas fa-database"></i> Gestion des Données</h2>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Exportation et importation des données</strong> - Sauvegardez ou restaurez vos données d'application
+                        </div>
+                    </div>
+                    
+                    <div class="data-management">
+                        <div class="data-actions">
+                            <button class="btn btn-success" id="export-products">
+                                <i class="fas fa-file-export"></i> Exporter les produits (CSV)
+                            </button>
+                            <button class="btn btn-success" id="export-sales">
+                                <i class="fas fa-file-export"></i> Exporter les ventes (CSV)
+                            </button>
+                            <button class="btn btn-info" id="export-all-data">
+                                <i class="fas fa-file-archive"></i> Exporter toutes les données
+                            </button>
+                            <button class="btn btn-warning" id="import-data">
+                                <i class="fas fa-file-import"></i> Importer des données
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="backup-file">Sélectionner un fichier de sauvegarde :</label>
+                            <input type="file" id="backup-file" accept=".json,.csv">
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong>Attention</strong> - L'importation de données écrasera les données existantes. Effectuez une sauvegarde avant.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1710,6 +2028,12 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="product-alert-threshold">Seuil d'alerte :</label>
+                    <input type="number" id="product-alert-threshold" min="0" value="5" required>
+                    <small class="text-muted">Le produit sera considéré en stock faible quand la quantité sera inférieure à cette valeur</small>
+                </div>
+                
+                <div class="form-group">
                     <label for="product-description">Description (optionnel) :</label>
                     <textarea id="product-description" rows="3"></textarea>
                 </div>
@@ -1737,7 +2061,7 @@
             accessKey: "Sarounia1",
             
             // Code personnel - Changez cette valeur (6 chiffres)
-            personalCode: "227117",
+            personalCode: "223117",
             
             // Nombre maximum de tentatives avant verrouillage
             maxAttempts: 5,
@@ -1966,14 +2290,14 @@
         
         // Données de l'application
         let products = [
-            { id: 1, name: "Parfum Fleur de Printemps", price: 75.00, stock: 15, category: "Parfum", description: "Parfum floral printanier" },
-            { id: 2, name: "Crème Hydratante Nuit", price: 45.00, stock: 22, category: "Cosmétique", description: "Crème hydratante pour la nuit" },
-            { id: 3, name: "Eau de Toilette Citrus", price: 60.00, stock: 10, category: "Parfum", description: "Eau de toilette aux notes d'agrumes" },
-            { id: 4, name: "Sérum Anti-Âge", price: 89.00, stock: 8, category: "Cosmétique", description: "Sérum anti-rides et anti-âge" },
-            { id: 5, name: "Parfum Bois Précieux", price: 95.00, stock: 12, category: "Parfum", description: "Parfum aux notes boisées précieuses" },
-            { id: 6, name: "Masque Éclat", price: 25.00, stock: 30, category: "Cosmétique", description: "Masque pour un teint éclatant" },
-            { id: 7, name: "Eau de Parfum Oriental", price: 110.00, stock: 5, category: "Parfum", description: "Parfum aux notes orientales" },
-            { id: 8, name: "Gommage Doux", price: 32.00, stock: 18, category: "Cosmétique", description: "Gommage doux pour le visage" }
+            { id: 1, name: "Parfum Fleur de Printemps", price: 75.00, stock: 15, alertThreshold: 5, category: "Parfum", description: "Parfum floral printanier" },
+            { id: 2, name: "Crème Hydratante Nuit", price: 45.00, stock: 22, alertThreshold: 5, category: "Cosmétique", description: "Crème hydratante pour la nuit" },
+            { id: 3, name: "Eau de Toilette Citrus", price: 60.00, stock: 10, alertThreshold: 5, category: "Parfum", description: "Eau de toilette aux notes d'agrumes" },
+            { id: 4, name: "Sérum Anti-Âge", price: 89.00, stock: 8, alertThreshold: 5, category: "Cosmétique", description: "Sérum anti-rides et anti-âge" },
+            { id: 5, name: "Parfum Bois Précieux", price: 95.00, stock: 12, alertThreshold: 5, category: "Parfum", description: "Parfum aux notes boisées précieuses" },
+            { id: 6, name: "Masque Éclat", price: 25.00, stock: 30, alertThreshold: 5, category: "Cosmétique", description: "Masque pour un teint éclatant" },
+            { id: 7, name: "Eau de Parfum Oriental", price: 110.00, stock: 5, alertThreshold: 5, category: "Parfum", description: "Parfum aux notes orientales" },
+            { id: 8, name: "Gommage Doux", price: 32.00, stock: 18, alertThreshold: 5, category: "Cosmétique", description: "Gommage doux pour le visage" }
         ];
         
         let cart = [];
@@ -1983,6 +2307,7 @@
         let discountType = 'global'; // 'global' or 'individual'
         let currentCurrency = 'EUR'; // Devise d'affichage par défaut
         let priceInputCurrency = 'EUR'; // Devise de saisie des prix
+        let searchTerm = ''; // Terme de recherche
 
         let app = {
             init() {
@@ -2012,6 +2337,7 @@
                 // Afficher les produits
                 this.renderProducts();
                 this.renderStockProducts();
+                this.renderLowStockProducts();
                 
                 // Mettre à jour les statistiques
                 this.updateStats();
@@ -2025,7 +2351,7 @@
                 // Générer les rapports initiaux
                 this.generateGlobalSalesReport();
                 this.generateMonthlyReport();
-                this.generateStockReport();
+                this.generateMonthlyStockReport();
             },
             
             initReportDates() {
@@ -2043,7 +2369,7 @@
                 const currentYear = now.getFullYear();
                 const yearSelectors = [
                     document.getElementById('monthly-year'),
-                    document.getElementById('stock-year')
+                    document.getElementById('stock-monthly-year')
                 ];
                 
                 yearSelectors.forEach(selector => {
@@ -2061,16 +2387,11 @@
                 
                 // Initialiser le sélecteur de mois avec le mois actuel
                 const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
-                const monthSelectors = [
-                    document.getElementById('monthly-month'),
-                    document.getElementById('stock-month')
-                ];
+                const monthlyMonth = document.getElementById('monthly-month');
+                if (monthlyMonth) monthlyMonth.value = currentMonth;
                 
-                monthSelectors.forEach(selector => {
-                    if (selector) {
-                        selector.value = currentMonth;
-                    }
-                });
+                const stockMonthlyMonth = document.getElementById('stock-monthly-month');
+                if (stockMonthlyMonth) stockMonthlyMonth.value = currentMonth;
             },
             
             loadData() {
@@ -2078,7 +2399,15 @@
                 const savedReservations = localStorage.getItem('perfumeReservations');
                 const savedSalesHistory = localStorage.getItem('perfumeSalesHistory');
                 
-                if (savedProducts) products = JSON.parse(savedProducts);
+                if (savedProducts) {
+                    products = JSON.parse(savedProducts);
+                    // Assurer que tous les produits ont un seuil d'alerte
+                    products.forEach(product => {
+                        if (!product.hasOwnProperty('alertThreshold')) {
+                            product.alertThreshold = 5;
+                        }
+                    });
+                }
                 if (savedReservations) reservations = JSON.parse(savedReservations);
                 if (savedSalesHistory) salesHistory = JSON.parse(savedSalesHistory);
             },
@@ -2118,12 +2447,21 @@
                 // Mettre à jour tous les affichages de prix
                 this.renderProducts();
                 this.renderStockProducts();
+                this.renderLowStockProducts();
                 this.updateCart();
                 this.updateStats();
                 this.renderSalesHistory();
                 this.generateGlobalSalesReport();
                 this.generateMonthlyReport();
-                this.generateStockReport();
+                this.generateMonthlyStockReport();
+            },
+            
+            // Fonction de recherche
+            searchProducts(term) {
+                searchTerm = term.toLowerCase();
+                this.renderProducts();
+                this.renderStockProducts();
+                this.renderLowStockProducts();
             },
             
             renderProducts() {
@@ -2132,45 +2470,52 @@
                 
                 productList.innerHTML = '';
                 
-                if (products.length === 0) {
+                // Filtrer les produits par terme de recherche et stock > 0
+                const filteredProducts = products.filter(product => 
+                    product.stock > 0 && 
+                    (product.name.toLowerCase().includes(searchTerm) || 
+                     product.category.toLowerCase().includes(searchTerm) ||
+                     product.description.toLowerCase().includes(searchTerm))
+                );
+                
+                if (filteredProducts.length === 0) {
                     productList.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>
-                            <p>Aucun produit en stock</p>
-                            <p class="text-muted">Ajoutez des produits pour commencer à vendre</p>
+                            <p>Aucun produit trouvé</p>
+                            <p class="text-muted">${searchTerm ? 'Aucun résultat pour votre recherche' : 'Ajoutez des produits pour commencer à vendre'}</p>
                         </div>
                     `;
                     return;
                 }
                 
-                products.forEach(product => {
-                    if (product.stock > 0) {
-                        const productItem = document.createElement('div');
-                        productItem.className = 'product-item';
-                        
-                        const displayPrice = this.convertPrice(product.price, 'EUR', currentCurrency);
-                        
-                        productItem.innerHTML = `
-                            <div class="product-info">
-                                <div class="product-name">${product.name}</div>
-                                <div class="product-details">
-                                    <span class="product-price">${this.formatPrice(displayPrice)}</span>
-                                    <span class="product-stock">${product.stock} en stock</span>
-                                    <span class="product-category">${product.category}</span>
-                                </div>
+                filteredProducts.forEach(product => {
+                    const productItem = document.createElement('div');
+                    productItem.className = 'product-item';
+                    
+                    const displayPrice = this.convertPrice(product.price, 'EUR', currentCurrency);
+                    
+                    productItem.innerHTML = `
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-details">
+                                <span class="product-price">${this.formatPrice(displayPrice)}</span>
+                                <span class="product-stock">${product.stock} en stock</span>
+                                <span class="product-category">${product.category}</span>
                             </div>
-                            <div class="product-actions">
-                                <button class="btn btn-primary btn-small add-to-cart" data-id="${product.id}">
-                                    <i class="fas fa-cart-plus"></i> Vendre
-                                </button>
-                                <button class="btn btn-secondary btn-small reserve-product" data-id="${product.id}">
-                                    <i class="far fa-calendar-check"></i> Réserver
-                                </button>
-                            </div>
-                        `;
-                        
-                        productList.appendChild(productItem);
-                    }
+                            ${product.stock <= product.alertThreshold ? `<div class="low-stock-warning"><i class="fas fa-exclamation-triangle"></i> Stock faible (seuil: ${product.alertThreshold})</div>` : ''}
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-small add-to-cart" data-id="${product.id}">
+                                <i class="fas fa-cart-plus"></i> Vendre
+                            </button>
+                            <button class="btn btn-secondary btn-small reserve-product" data-id="${product.id}">
+                                <i class="far fa-calendar-check"></i> Réserver
+                            </button>
+                        </div>
+                    `;
+                    
+                    productList.appendChild(productItem);
                 });
                 
                 // Mettre à jour la liste des produits pour les réservations
@@ -2183,22 +2528,30 @@
                 
                 stockProductList.innerHTML = '';
                 
-                if (products.length === 0) {
+                // Filtrer les produits par terme de recherche
+                const filteredProducts = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) || 
+                    product.category.toLowerCase().includes(searchTerm) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm))
+                );
+                
+                if (filteredProducts.length === 0) {
                     stockProductList.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-boxes"></i>
-                            <p>Aucun produit enregistré</p>
+                            <p>Aucun produit trouvé</p>
+                            <p class="text-muted">${searchTerm ? 'Aucun résultat pour votre recherche' : 'Aucun produit enregistré'}</p>
                         </div>
                     `;
                     return;
                 }
                 
-                products.forEach(product => {
+                filteredProducts.forEach(product => {
                     const productItem = document.createElement('div');
                     productItem.className = 'product-item';
                     
-                    const stockStatus = product.stock > 5 ? 'text-success' : (product.stock > 0 ? 'text-warning' : 'text-danger');
-                    const stockIcon = product.stock > 5 ? 'fa-check-circle' : (product.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle');
+                    const stockStatus = product.stock > product.alertThreshold ? 'text-success' : (product.stock > 0 ? 'text-warning' : 'text-danger');
+                    const stockIcon = product.stock > product.alertThreshold ? 'fa-check-circle' : (product.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle');
                     
                     const displayPrice = this.convertPrice(product.price, 'EUR', currentCurrency);
                     
@@ -2208,11 +2561,12 @@
                             <div class="product-details">
                                 <span class="product-price">${this.formatPrice(displayPrice)}</span>
                                 <span class="product-stock ${stockStatus}">
-                                    <i class="fas ${stockIcon}"></i> ${product.stock} en stock
+                                    <i class="fas ${stockIcon}"></i> ${product.stock} en stock (seuil: ${product.alertThreshold})
                                 </span>
                                 <span class="product-category">${product.category}</span>
                             </div>
                             ${product.description ? `<div style="margin-top: 5px; font-size: 0.85rem; color: var(--gray);">${product.description}</div>` : ''}
+                            ${product.stock <= product.alertThreshold ? `<div class="low-stock-warning"><i class="fas fa-exclamation-triangle"></i> Stock faible</div>` : ''}
                         </div>
                         <div class="product-actions">
                             <button class="btn btn-warning btn-small edit-product" data-id="${product.id}">
@@ -2239,6 +2593,85 @@
                     button.addEventListener('click', function() {
                         const productId = parseInt(this.dataset.id);
                         app.deleteProduct(productId);
+                    });
+                });
+            },
+            
+            renderLowStockProducts() {
+                const lowStockList = document.getElementById('low-stock-list');
+                if (!lowStockList) return;
+                
+                lowStockList.innerHTML = '';
+                
+                // Filtrer les produits avec stock faible (<= seuil d'alerte) et par terme de recherche
+                const lowStockProducts = products.filter(product => 
+                    product.stock <= product.alertThreshold && 
+                    (product.name.toLowerCase().includes(searchTerm) || 
+                     product.category.toLowerCase().includes(searchTerm) ||
+                     (product.description && product.description.toLowerCase().includes(searchTerm)))
+                );
+                
+                if (lowStockProducts.length === 0) {
+                    lowStockList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <p>Aucun produit en stock faible</p>
+                            <p class="text-muted">${searchTerm ? 'Aucun résultat pour votre recherche' : 'Tous les produits ont un stock suffisant'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                lowStockProducts.forEach(product => {
+                    const productItem = document.createElement('div');
+                    productItem.className = 'product-item';
+                    
+                    const stockStatus = product.stock > 0 ? 'text-warning' : 'text-danger';
+                    const stockIcon = product.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle';
+                    
+                    const displayPrice = this.convertPrice(product.price, 'EUR', currentCurrency);
+                    
+                    productItem.innerHTML = `
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-details">
+                                <span class="product-price">${this.formatPrice(displayPrice)}</span>
+                                <span class="product-stock ${stockStatus}">
+                                    <i class="fas ${stockIcon}"></i> ${product.stock} en stock (seuil: ${product.alertThreshold})
+                                </span>
+                                <span class="product-category">${product.category}</span>
+                            </div>
+                            <div class="low-stock-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                ${product.stock === 0 ? 'Rupture de stock' : 'Stock faible'}
+                            </div>
+                            ${product.description ? `<div style="margin-top: 5px; font-size: 0.85rem; color: var(--gray);">${product.description}</div>` : ''}
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-small add-to-cart" data-id="${product.id}">
+                                <i class="fas fa-cart-plus"></i> Vendre
+                            </button>
+                            <button class="btn btn-warning btn-small edit-product" data-id="${product.id}">
+                                <i class="fas fa-edit"></i> Modifier
+                            </button>
+                        </div>
+                    `;
+                    
+                    lowStockList.appendChild(productItem);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = parseInt(this.dataset.id);
+                        app.addToCart(productId);
+                    });
+                });
+                
+                document.querySelectorAll('.edit-product').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = parseInt(this.dataset.id);
+                        app.editProduct(productId);
                     });
                 });
             },
@@ -2302,10 +2735,13 @@
                 
                 // Mettre à jour la liste des réservations
                 this.renderReservations();
+                
+                // Mettre à jour la liste des stocks faibles
+                this.renderLowStockProducts();
             },
             
             setupEventListeners() {
-                // Navigation par onglets
+                // Navigation par onglets (seulement sur desktop)
                 document.querySelectorAll('.tab').forEach(tab => {
                     tab.addEventListener('click', function() {
                         // Désactiver tous les onglets
@@ -2317,6 +2753,45 @@
                         const tabId = `${this.dataset.tab}-tab`;
                         const tabContent = document.getElementById(tabId);
                         if (tabContent) tabContent.classList.add('active');
+                        
+                        // Mettre à jour le menu de navigation
+                        app.updateNavMenu(this.dataset.tab);
+                    });
+                });
+                
+                // Menu hamburger
+                const hamburgerMenu = document.getElementById('hamburgerMenu');
+                const navOverlay = document.getElementById('navOverlay');
+                const navDrawer = document.getElementById('navDrawer');
+                
+                if (hamburgerMenu) {
+                    hamburgerMenu.addEventListener('click', function() {
+                        navDrawer.classList.toggle('active');
+                        navOverlay.classList.toggle('active');
+                    });
+                }
+                
+                if (navOverlay) {
+                    navOverlay.addEventListener('click', function() {
+                        app.closeNavMenu();
+                    });
+                }
+                
+                // Navigation par menu
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const tab = this.dataset.tab;
+                        
+                        // Activer l'onglet correspondant
+                        document.querySelectorAll('.tab').forEach(t => {
+                            if (t.dataset.tab === tab) {
+                                t.click();
+                            }
+                        });
+                        
+                        // Fermer le menu
+                        app.closeNavMenu();
                     });
                 });
                 
@@ -2328,6 +2803,31 @@
                         app.saveData();
                     });
                 });
+                
+                // Barre de recherche
+                const searchInput = document.getElementById('search-input');
+                const searchBtn = document.getElementById('search-btn');
+                
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        app.searchProducts(this.value);
+                    });
+                    
+                    searchInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            app.searchProducts(this.value);
+                        }
+                    });
+                }
+                
+                if (searchBtn) {
+                    searchBtn.addEventListener('click', function() {
+                        const searchInput = document.getElementById('search-input');
+                        if (searchInput) {
+                            app.searchProducts(searchInput.value);
+                        }
+                    });
+                }
                 
                 // Toggle de devise pour la saisie des prix
                 const priceCurrencyToggle = document.getElementById('price-currency-toggle');
@@ -2452,6 +2952,14 @@
                     });
                 }
                 
+                // Supprimer les ventes du jour
+                const deleteTodaySalesBtn = document.getElementById('delete-today-sales');
+                if (deleteTodaySalesBtn) {
+                    deleteTodaySalesBtn.addEventListener('click', function() {
+                        app.deleteTodaySales();
+                    });
+                }
+                
                 // Gestion des produits
                 const addProductBtn = document.getElementById('add-product-btn');
                 if (addProductBtn) {
@@ -2473,6 +2981,44 @@
                     cancelProductBtn.addEventListener('click', function() {
                         const productModal = document.getElementById('product-modal');
                         if (productModal) productModal.style.display = 'none';
+                    });
+                }
+                
+                // Gestion des données
+                const exportProductsBtn = document.getElementById('export-products');
+                if (exportProductsBtn) {
+                    exportProductsBtn.addEventListener('click', function() {
+                        app.exportProductsToCSV();
+                    });
+                }
+                
+                const exportSalesBtn = document.getElementById('export-sales');
+                if (exportSalesBtn) {
+                    exportSalesBtn.addEventListener('click', function() {
+                        app.exportSalesToCSV();
+                    });
+                }
+                
+                const exportAllDataBtn = document.getElementById('export-all-data');
+                if (exportAllDataBtn) {
+                    exportAllDataBtn.addEventListener('click', function() {
+                        app.exportAllData();
+                    });
+                }
+                
+                const importDataBtn = document.getElementById('import-data');
+                if (importDataBtn) {
+                    importDataBtn.addEventListener('click', function() {
+                        document.getElementById('backup-file').click();
+                    });
+                }
+                
+                const backupFileInput = document.getElementById('backup-file');
+                if (backupFileInput) {
+                    backupFileInput.addEventListener('change', function(e) {
+                        if (e.target.files.length > 0) {
+                            app.importData(e.target.files[0]);
+                        }
                     });
                 }
                 
@@ -2516,10 +3062,10 @@
                     });
                 }
                 
-                const applyStockFilterBtn = document.getElementById('apply-stock-filter');
-                if (applyStockFilterBtn) {
-                    applyStockFilterBtn.addEventListener('click', function() {
-                        app.generateStockReport();
+                const applyStockMonthlyFilterBtn = document.getElementById('apply-stock-monthly-filter');
+                if (applyStockMonthlyFilterBtn) {
+                    applyStockMonthlyFilterBtn.addEventListener('click', function() {
+                        app.generateMonthlyStockReport();
                     });
                 }
                 
@@ -2532,6 +3078,23 @@
                 
                 // Gestion des événements tactiles pour mobile
                 document.addEventListener('touchstart', function() {}, {passive: true});
+            },
+            
+            closeNavMenu() {
+                const navOverlay = document.getElementById('navOverlay');
+                const navDrawer = document.getElementById('navDrawer');
+                
+                if (navOverlay) navOverlay.classList.remove('active');
+                if (navDrawer) navDrawer.classList.remove('active');
+            },
+            
+            updateNavMenu(activeTab) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.tab === activeTab) {
+                        link.classList.add('active');
+                    }
+                });
             },
             
             addToCart(productId) {
@@ -2721,7 +3284,12 @@
                 // Enregistrer la vente dans l'historique
                 const saleDateInput = document.getElementById('sale-date');
                 const saleDate = saleDateInput ? saleDateInput.value : new Date().toISOString().split('T')[0];
+                
+                // Générer un ID unique pour la vente
+                const saleId = Date.now();
+                
                 salesHistory.push({
+                    id: saleId,
                     date: saleDate,
                     amount: totalEUR,
                     items: [...cart]
@@ -2744,13 +3312,14 @@
                 this.updateCart();
                 this.renderProducts();
                 this.renderStockProducts();
+                this.renderLowStockProducts();
                 this.updateStats();
                 this.saveData();
                 
                 // Regénérer les rapports
                 this.generateGlobalSalesReport();
                 this.generateMonthlyReport();
-                this.generateStockReport();
+                this.generateMonthlyStockReport();
             },
             
             addReservation() {
@@ -2980,10 +3549,83 @@
                             <p><strong>Montant :</strong> ${this.formatPrice(displayAmount)}</p>
                             <p><strong>Produits :</strong> ${sale.items.map(item => `${item.product.name} (x${item.quantity})`).join(', ')}</p>
                         </div>
+                        <div class="reservation-actions">
+                            <button class="btn btn-danger btn-small delete-sale" data-id="${sale.id}">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </div>
                     `;
                     
                     salesHistoryElement.appendChild(saleElement);
                 });
+                
+                // Ajouter les écouteurs d'événements pour les boutons de suppression individuelle
+                document.querySelectorAll('.delete-sale').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const saleId = parseInt(this.dataset.id);
+                        app.deleteSale(saleId);
+                    });
+                });
+            },
+            
+            deleteSale(saleId) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette vente ? Cette action est irréversible.')) {
+                    const saleIndex = salesHistory.findIndex(sale => sale.id === saleId);
+                    
+                    if (saleIndex !== -1) {
+                        const sale = salesHistory[saleIndex];
+                        
+                        // Restaurer le stock des produits vendus
+                        sale.items.forEach(item => {
+                            const product = products.find(p => p.id === item.product.id);
+                            if (product) {
+                                product.stock += item.quantity;
+                            }
+                        });
+                        
+                        // Supprimer la vente de l'historique
+                        salesHistory.splice(saleIndex, 1);
+                        
+                        // Mettre à jour l'interface
+                        this.updateStats();
+                        this.saveData();
+                        this.renderSalesHistory();
+                        
+                        alert('Vente supprimée avec succès. Le stock a été restauré.');
+                    }
+                }
+            },
+            
+            deleteTodaySales() {
+                const today = new Date().toISOString().split('T')[0];
+                const todaySales = salesHistory.filter(sale => sale.date === today);
+                
+                if (todaySales.length === 0) {
+                    alert('Aucune vente trouvée pour aujourd\'hui.');
+                    return;
+                }
+                
+                if (confirm(`Êtes-vous sûr de vouloir supprimer les ${todaySales.length} ventes du jour ? Cette action est irréversible.`)) {
+                    // Restaurer le stock pour toutes les ventes du jour
+                    todaySales.forEach(sale => {
+                        sale.items.forEach(item => {
+                            const product = products.find(p => p.id === item.product.id);
+                            if (product) {
+                                product.stock += item.quantity;
+                            }
+                        });
+                    });
+                    
+                    // Filtrer les ventes pour ne garder que celles qui ne sont pas d'aujourd'hui
+                    salesHistory = salesHistory.filter(sale => sale.date !== today);
+                    
+                    // Mettre à jour l'interface
+                    this.updateStats();
+                    this.saveData();
+                    this.renderSalesHistory();
+                    
+                    alert(`${todaySales.length} ventes du jour ont été supprimées. Le stock a été restauré.`);
+                }
             },
             
             checkReservationAlerts() {
@@ -3039,12 +3681,15 @@
                     document.getElementById('product-category').value = product.category;
                     document.getElementById('product-price').value = product.price;
                     document.getElementById('product-stock').value = product.stock;
+                    document.getElementById('product-alert-threshold').value = product.alertThreshold;
                     document.getElementById('product-description').value = product.description || '';
                 } else {
                     // Mode ajout
                     title.innerHTML = '<i class="fas fa-box"></i> Ajouter un produit';
                     form.reset();
                     document.getElementById('product-id').value = '';
+                    // Valeur par défaut pour le seuil d'alerte
+                    document.getElementById('product-alert-threshold').value = 5;
                 }
                 
                 modal.style.display = 'flex';
@@ -3060,9 +3705,10 @@
                 const category = document.getElementById('product-category').value;
                 let price = parseFloat(document.getElementById('product-price').value);
                 const stock = parseInt(document.getElementById('product-stock').value);
+                const alertThreshold = parseInt(document.getElementById('product-alert-threshold').value);
                 const description = document.getElementById('product-description').value;
                 
-                if (!name || !category || isNaN(price) || isNaN(stock)) {
+                if (!name || !category || isNaN(price) || isNaN(stock) || isNaN(alertThreshold)) {
                     alert('Veuillez remplir tous les champs obligatoires.');
                     return;
                 }
@@ -3080,6 +3726,7 @@
                         products[productIndex].category = category;
                         products[productIndex].price = price;
                         products[productIndex].stock = stock;
+                        products[productIndex].alertThreshold = alertThreshold;
                         products[productIndex].description = description;
                     }
                 } else {
@@ -3091,6 +3738,7 @@
                         category: category,
                         price: price,
                         stock: stock,
+                        alertThreshold: alertThreshold,
                         description: description
                     });
                 }
@@ -3098,6 +3746,7 @@
                 // Mettre à jour l'interface
                 this.renderProducts();
                 this.renderStockProducts();
+                this.renderLowStockProducts();
                 this.updateStats();
                 this.saveData();
                 
@@ -3117,12 +3766,123 @@
                         // Mettre à jour l'interface
                         this.renderProducts();
                         this.renderStockProducts();
+                        this.renderLowStockProducts();
                         this.updateStats();
                         this.saveData();
                         
                         alert('Produit supprimé avec succès !');
                     }
                 }
+            },
+            
+            // =============================================
+            // FONCTIONNALITÉS D'EXPORTATION/IMPORTATION
+            // =============================================
+            
+            exportProductsToCSV() {
+                const headers = ['ID', 'Nom', 'Catégorie', 'Prix (EUR)', 'Stock', 'Seuil d\'alerte', 'Description'];
+                const csvData = products.map(product => [
+                    product.id,
+                    `"${product.name}"`,
+                    `"${product.category}"`,
+                    product.price,
+                    product.stock,
+                    product.alertThreshold,
+                    `"${product.description || ''}"`
+                ]);
+                
+                const csvContent = [headers, ...csvData]
+                    .map(row => row.join(','))
+                    .join('\n');
+                
+                this.downloadCSV(csvContent, 'produits_perfumeria_konate.csv');
+                this.showToast('Export des produits réussi!', 'success');
+            },
+            
+            exportSalesToCSV() {
+                const headers = ['Date', 'Montant (EUR)', 'Produits', 'Quantité totale'];
+                const csvData = salesHistory.map(sale => {
+                    const productsList = sale.items.map(item => `${item.product.name} (x${item.quantity})`).join('; ');
+                    const totalQuantity = sale.items.reduce((sum, item) => sum + item.quantity, 0);
+                    
+                    return [
+                        sale.date,
+                        sale.amount,
+                        `"${productsList}"`,
+                        totalQuantity
+                    ];
+                });
+                
+                const csvContent = [headers, ...csvData]
+                    .map(row => row.join(','))
+                    .join('\n');
+                
+                this.downloadCSV(csvContent, 'ventes_perfumeria_konate.csv');
+                this.showToast('Export des ventes réussi!', 'success');
+            },
+            
+            exportAllData() {
+                const allData = {
+                    products: products,
+                    salesHistory: salesHistory,
+                    reservations: reservations,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const dataStr = JSON.stringify(allData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                this.downloadFile(dataBlob, 'sauvegarde_complete_perfumeria_konate.json');
+                this.showToast('Sauvegarde complète réussie!', 'success');
+            },
+            
+            importData(file) {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    try {
+                        const fileContent = e.target.result;
+                        
+                        if (file.name.endsWith('.json')) {
+                            // Importation de sauvegarde complète
+                            const importedData = JSON.parse(fileContent);
+                            
+                            if (confirm('Cette action va remplacer toutes vos données actuelles. Continuer ?')) {
+                                if (importedData.products) products = importedData.products;
+                                if (importedData.salesHistory) salesHistory = importedData.salesHistory;
+                                if (importedData.reservations) reservations = importedData.reservations;
+                                
+                                this.saveData();
+                                this.init();
+                                this.showToast('Données importées avec succès!', 'success');
+                            }
+                        } else if (file.name.endsWith('.csv')) {
+                            // Importation CSV (à implémenter selon le format)
+                            alert('Importation CSV à implémenter selon le format spécifique');
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors de l\'importation:', error);
+                        alert('Erreur lors de l\'importation des données. Format de fichier invalide.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            },
+            
+            downloadCSV(csvContent, filename) {
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                this.downloadFile(blob, filename);
+            },
+            
+            downloadFile(blob, filename) {
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             },
             
             // =============================================
@@ -3306,66 +4066,88 @@
                 });
             },
             
-            generateStockReport() {
-                const year = document.getElementById('stock-year').value;
-                const month = document.getElementById('stock-month').value;
+            generateMonthlyStockReport() {
+                const year = document.getElementById('stock-monthly-year').value;
+                const month = document.getElementById('stock-monthly-month').value;
                 
                 if (!year || !month) {
                     alert('Veuillez sélectionner une année et un mois.');
                     return;
                 }
                 
-                // Calculer les statistiques de stock en EUR
-                const stockValueEUR = products.reduce((total, product) => total + (product.price * product.stock), 0);
-                const stockCount = products.length;
-                const outOfStockCount = products.filter(p => p.stock === 0).length;
-                const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+                // Calculer les mouvements de stock pour le mois sélectionné
+                const monthStart = `${year}-${month}-01`;
+                const monthEnd = new Date(year, month, 0).toISOString().split('T')[0];
                 
-                // Convertir en devise d'affichage
-                const stockValue = this.convertPrice(stockValueEUR, 'EUR', currentCurrency);
+                // Filtrer les ventes du mois
+                const monthlySales = salesHistory.filter(sale => 
+                    sale.date >= monthStart && sale.date <= monthEnd
+                );
+                
+                // Calculer les statistiques de stock
+                const initialStock = products.reduce((total, product) => total + product.stock, 0);
+                
+                // Calculer les sorties (ventes) du mois
+                const productsSold = monthlySales.reduce((total, sale) => 
+                    total + sale.items.reduce((sum, item) => sum + item.quantity, 0), 0
+                );
+                
+                // Pour cet exemple, on considère qu'il n'y a pas d'entrées de stock
+                // Dans une application réelle, vous auriez un système de gestion des entrées de stock
+                const entries = 0;
+                
+                // Stock final théorique
+                const finalStock = initialStock - productsSold;
+                
+                // Taux de rotation (simplifié)
+                const turnoverRate = initialStock > 0 ? (productsSold / initialStock * 100).toFixed(1) : 0;
                 
                 // Mettre à jour l'interface
-                document.getElementById('stock-report-value').textContent = this.formatPrice(stockValue);
-                document.getElementById('stock-report-count').textContent = stockCount;
-                document.getElementById('stock-report-outofstock').textContent = outOfStockCount;
-                document.getElementById('stock-report-low').textContent = lowStockCount;
+                document.getElementById('monthly-initial-stock').textContent = initialStock;
+                document.getElementById('monthly-final-stock').textContent = finalStock;
+                document.getElementById('monthly-products-sold').textContent = productsSold;
+                document.getElementById('monthly-stock-turnover').textContent = `${turnoverRate}%`;
                 
-                // Générer le tableau des détails
-                const detailsTable = document.getElementById('stock-report-details');
-                detailsTable.innerHTML = '';
+                // Générer le tableau des détails du stock par produit
+                const stockDetailsTable = document.getElementById('monthly-stock-details');
+                stockDetailsTable.innerHTML = '';
                 
-                if (products.length === 0) {
-                    detailsTable.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 20px;">
-                                Aucun produit en stock
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Pour cet exemple, nous n'avons pas d'historique de stock, donc nous utilisons les données actuelles
                 products.forEach(product => {
                     const row = document.createElement('tr');
-                    const stockStatus = product.stock > 5 ? 'text-success' : 
-                                       (product.stock > 0 ? 'text-warning' : 'text-danger');
                     
-                    // Dans une application réelle, vous auriez un historique des stocks
-                    // Pour cet exemple, nous utilisons des valeurs simulées
-                    const startStock = Math.min(product.stock + Math.floor(Math.random() * 10), 50);
-                    const monthlySales = startStock - product.stock;
-                    const variation = monthlySales > 0 ? `-${monthlySales}` : `+${Math.abs(monthlySales)}`;
+                    // Calculer les ventes du produit pour le mois
+                    const productSales = monthlySales.reduce((total, sale) => {
+                        const productInSale = sale.items.find(item => item.product.id === product.id);
+                        return total + (productInSale ? productInSale.quantity : 0);
+                    }, 0);
+                    
+                    // Pour cet exemple, on considère qu'il n'y a pas d'entrées de stock
+                    const productEntries = 0;
+                    
+                    // Stock final théorique pour ce produit
+                    const productFinalStock = product.stock + productEntries - productSales;
                     
                     row.innerHTML = `
                         <td>${product.name}</td>
-                        <td class="${stockStatus}">${product.stock}</td>
-                        <td>${startStock}</td>
-                        <td>${monthlySales > 0 ? monthlySales : 0}</td>
-                        <td>${variation}</td>
+                        <td>${product.stock}</td>
+                        <td>${productEntries}</td>
+                        <td>${productSales}</td>
+                        <td>${productFinalStock}</td>
                     `;
-                    detailsTable.appendChild(row);
+                    
+                    stockDetailsTable.appendChild(row);
                 });
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = `toast toast-${type}`;
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 4000);
             }
         };
 
