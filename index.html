@@ -38,6 +38,8 @@
             overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
             -webkit-tap-highlight-color: transparent;
+            height: 100vh;
+            overflow-y: auto;
         }
         
         .container {
@@ -165,8 +167,8 @@
         /* Application Styles */
         #appContainer {
             display: none;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         
         /* Header Styles - MOBILE FIRST */
@@ -375,8 +377,8 @@
         .main-content {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 150px);
-            overflow: hidden;
+            min-height: calc(100vh - 150px);
+            overflow-y: auto;
         }
         
         /* Search Bar */
@@ -993,6 +995,7 @@
             color: var(--dark);
         }
         
+        /* CORRECTION DES TABLEAUX DE RAPPORTS */
         .report-table-container {
             overflow-x: auto;
             margin-top: 15px;
@@ -1000,6 +1003,7 @@
             border-radius: var(--border-radius);
             max-height: 400px;
             overflow-y: auto;
+            position: relative;
         }
         
         .report-table {
@@ -1667,8 +1671,6 @@
                         </div>
                     </div>
                     
-                    <!-- SUPPRIMÉ: Ancien champ de recherche pour les réservations -->
-                    
                     <div class="form-group">
                         <label for="reservation-product-search">Sélectionnez un produit (recherche par mot-clé) :</label>
                         <input type="text" id="reservation-product-search" placeholder="Tapez le nom d'un produit...">
@@ -1714,7 +1716,7 @@
                     </div>
                 </div>
                 
-                <!-- Onglet Ventes Globales -->
+                <!-- Onglet Ventes Globales - CORRIGÉ -->
                 <div class="tab-content" id="global-sales-tab">
                     <h2><i class="fas fa-list"></i> Ventes Globales</h2>
                     
@@ -1779,7 +1781,7 @@
                     </div>
                 </div>
                 
-                <!-- Onglet Rapport Mensuel -->
+                <!-- Onglet Rapport Mensuel - CORRIGÉ -->
                 <div class="tab-content" id="monthly-report-tab">
                     <h2><i class="fas fa-chart-bar"></i> Rapport Mensuel des Ventes</h2>
                     
@@ -2091,10 +2093,10 @@
         // MODIFIEZ CES VALEURS PAR BALLA KONATE
         const SECURITY_CONFIG = {
             // Clé d'accès principale - Changez cette valeur
-            accessKey: "Sarounia1",
+            accessKey: "BallaKonate2024!",
             
             // Code personnel - Changez cette valeur (6 chiffres)
-            personalCode: "223117",
+            personalCode: "010189",
             
             // Nombre maximum de tentatives avant verrouillage
             maxAttempts: 5,
@@ -2553,6 +2555,27 @@
                     
                     productList.appendChild(productItem);
                 });
+                
+                // Ajouter les écouteurs d'événements pour les boutons
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = parseInt(this.dataset.id);
+                        app.addToCart(productId);
+                    });
+                });
+                
+                document.querySelectorAll('.reserve-product').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = parseInt(this.dataset.id);
+                        const reservationProductSearch = document.getElementById('reservation-product-search');
+                        const product = products.find(p => p.id === productId);
+                        if (reservationProductSearch && product) {
+                            reservationProductSearch.value = product.name;
+                            const reservationsTab = document.querySelector('.tab[data-tab="reservations"]');
+                            if (reservationsTab) reservationsTab.click();
+                        }
+                    });
+                });
             },
             
             renderStockProducts() {
@@ -2957,30 +2980,6 @@
                         }
                     });
                 }
-                
-                // Ajouter au panier
-                document.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('add-to-cart') || e.target.closest('.add-to-cart')) {
-                        const button = e.target.classList.contains('add-to-cart') ? e.target : e.target.closest('.add-to-cart');
-                        const productId = parseInt(button.dataset.id);
-                        app.addToCart(productId);
-                    }
-                });
-                
-                // Réserver un produit
-                document.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('reserve-product') || e.target.closest('.reserve-product')) {
-                        const button = e.target.classList.contains('reserve-product') ? e.target : e.target.closest('.reserve-product');
-                        const productId = parseInt(button.dataset.id);
-                        const reservationProductSearch = document.getElementById('reservation-product-search');
-                        const product = products.find(p => p.id === productId);
-                        if (reservationProductSearch && product) {
-                            reservationProductSearch.value = product.name;
-                            const reservationsTab = document.querySelector('.tab[data-tab="reservations"]');
-                            if (reservationsTab) reservationsTab.click();
-                        }
-                    }
-                });
                 
                 // Options de remise
                 document.querySelectorAll('.discount-option').forEach(option => {
@@ -3999,7 +3998,7 @@
             },
             
             // =============================================
-            // RAPPORTS AVANCÉS
+            // RAPPORTS AVANCÉS - CORRIGÉS
             // =============================================
             
             generateGlobalSalesReport() {
