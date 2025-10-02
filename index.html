@@ -998,6 +998,8 @@
             margin-top: 15px;
             border: 1px solid #eee;
             border-radius: var(--border-radius);
+            max-height: 400px;
+            overflow-y: auto;
         }
         
         .report-table {
@@ -1118,12 +1120,6 @@
             gap: 5px;
         }
         
-        .original-price {
-            text-decoration: line-through;
-            color: var(--gray);
-            font-size: 0.8rem;
-        }
-        
         /* Low Stock Warning */
         .low-stock-warning {
             color: var(--danger);
@@ -1145,6 +1141,40 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 10px;
+        }
+        
+        /* Suggestions Container */
+        .suggestions-container {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            width: calc(100% - 30px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 5px;
+        }
+        
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        .suggestion-item:hover, .suggestion-item.active {
+            background-color: rgba(142, 68, 173, 0.1);
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-item small {
+            color: var(--gray);
+            font-size: 0.8rem;
         }
         
         /* Responsive Adjustments */
@@ -1626,7 +1656,7 @@
                     </div>
                 </div>
                 
-                <!-- Onglet Réservations -->
+                <!-- Onglet Réservations MODIFIÉ -->
                 <div class="tab-content" id="reservations-tab">
                     <h2><i class="far fa-calendar-check"></i> Gestion des réservations</h2>
                     
@@ -1637,11 +1667,12 @@
                         </div>
                     </div>
                     
+                    <!-- SUPPRIMÉ: Ancien champ de recherche pour les réservations -->
+                    
                     <div class="form-group">
-                        <label for="reservation-product">Produit à réserver :</label>
-                        <select id="reservation-product">
-                            <!-- Les options seront remplies par JavaScript -->
-                        </select>
+                        <label for="reservation-product-search">Sélectionnez un produit (recherche par mot-clé) :</label>
+                        <input type="text" id="reservation-product-search" placeholder="Tapez le nom d'un produit...">
+                        <div id="reservation-product-suggestions" class="suggestions-container" style="display: none;"></div>
                     </div>
                     
                     <div class="form-group">
@@ -1738,6 +1769,7 @@
                                     <th>Montant</th>
                                     <th>Produits</th>
                                     <th>Quantité</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="global-sales-details">
@@ -1816,6 +1848,7 @@
                                     <th>Produit</th>
                                     <th>Quantité vendue</th>
                                     <th>Chiffre d'affaires</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="monthly-top-products">
@@ -2345,6 +2378,9 @@
                 // Configurer les écouteurs d'événements
                 this.setupEventListeners();
                 
+                // Configurer l'autocomplete pour les réservations
+                this.setupReservationAutocomplete();
+                
                 // Vérifier les réservations pour les alertes
                 this.checkReservationAlerts();
                 
@@ -2517,9 +2553,6 @@
                     
                     productList.appendChild(productItem);
                 });
-                
-                // Mettre à jour la liste des produits pour les réservations
-                this.updateReservationProductList();
             },
             
             renderStockProducts() {
@@ -2676,26 +2709,102 @@
                 });
             },
             
-            updateReservationProductList() {
-                const reservationProductSelect = document.getElementById('reservation-product');
-                if (!reservationProductSelect) return;
+            setupReservationAutocomplete() {
+                const searchInput = document.getElementById('reservation-product-search');
+                const suggestionsContainer = document.getElementById('reservation-product-suggestions');
                 
-                reservationProductSelect.innerHTML = '';
+                if (!searchInput || !suggestionsContainer) return;
                 
-                // Option par défaut
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = 'Sélectionnez un produit';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                reservationProductSelect.appendChild(defaultOption);
+                let selectedProductId = null;
                 
-                products.forEach(product => {
-                    if (product.stock > 0) {
-                        const option = document.createElement('option');
-                        option.value = product.id;
-                        option.textContent = `${product.name} (${product.stock} en stock)`;
-                        reservationProductSelect.appendChild(option);
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    
+                    if (searchTerm.length < 2) {
+                        suggestionsContainer.style.display = 'none';
+                        selectedProductId = null;
+                        return;
+                    }
+                    
+                    // Filtrer les produits correspondants
+                    const matchingProducts = products.filter(product => 
+                        product.name.toLowerCase().includes(searchTerm) || 
+                        product.category.toLowerCase().includes(searchTerm) ||
+                        (product.description && product.description.toLowerCase().includes(searchTerm))
+                    );
+                    
+                    if (matchingProducts.length === 0) {
+                        suggestionsContainer.innerHTML = '<div class="suggestion-item">Aucun produit trouvé</div>';
+                        suggestionsContainer.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Afficher les suggestions
+                    suggestionsContainer.innerHTML = '';
+                    matchingProducts.forEach(product => {
+                        const suggestionItem = document.createElement('div');
+                        suggestionItem.className = 'suggestion-item';
+                        suggestionItem.innerHTML = `
+                            <strong>${product.name}</strong> 
+                            <span class="text-muted">- ${product.category}</span>
+                            <br>
+                            <small>Stock: ${product.stock} | ${app.formatPrice(app.convertPrice(product.price, 'EUR', currentCurrency))}</small>
+                        `;
+                        suggestionItem.dataset.productId = product.id;
+                        
+                        suggestionItem.addEventListener('click', function() {
+                            selectedProductId = parseInt(this.dataset.productId);
+                            const product = products.find(p => p.id === selectedProductId);
+                            if (product) {
+                                searchInput.value = product.name;
+                                suggestionsContainer.style.display = 'none';
+                                
+                                // Focus sur le champ suivant
+                                document.getElementById('client-phone').focus();
+                            }
+                        });
+                        
+                        suggestionsContainer.appendChild(suggestionItem);
+                    });
+                    
+                    suggestionsContainer.style.display = 'block';
+                });
+                
+                // Cacher les suggestions quand on clique ailleurs
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                });
+                
+                // Navigation clavier dans les suggestions
+                searchInput.addEventListener('keydown', function(e) {
+                    const suggestions = suggestionsContainer.querySelectorAll('.suggestion-item');
+                    let activeSuggestion = suggestionsContainer.querySelector('.suggestion-item.active');
+                    
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (!activeSuggestion) {
+                            suggestions[0]?.classList.add('active');
+                        } else {
+                            activeSuggestion.classList.remove('active');
+                            const next = activeSuggestion.nextElementSibling;
+                            if (next) next.classList.add('active');
+                            else suggestions[0]?.classList.add('active');
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (!activeSuggestion) {
+                            suggestions[suggestions.length - 1]?.classList.add('active');
+                        } else {
+                            activeSuggestion.classList.remove('active');
+                            const prev = activeSuggestion.previousElementSibling;
+                            if (prev) prev.classList.add('active');
+                            else suggestions[suggestions.length - 1]?.classList.add('active');
+                        }
+                    } else if (e.key === 'Enter' && activeSuggestion) {
+                        e.preventDefault();
+                        activeSuggestion.click();
                     }
                 });
             },
@@ -2804,7 +2913,7 @@
                     });
                 });
                 
-                // Barre de recherche
+                // Barre de recherche principale
                 const searchInput = document.getElementById('search-input');
                 const searchBtn = document.getElementById('search-btn');
                 
@@ -2863,10 +2972,13 @@
                     if (e.target.classList.contains('reserve-product') || e.target.closest('.reserve-product')) {
                         const button = e.target.classList.contains('reserve-product') ? e.target : e.target.closest('.reserve-product');
                         const productId = parseInt(button.dataset.id);
-                        const reservationProductSelect = document.getElementById('reservation-product');
-                        if (reservationProductSelect) reservationProductSelect.value = productId;
-                        const reservationsTab = document.querySelector('.tab[data-tab="reservations"]');
-                        if (reservationsTab) reservationsTab.click();
+                        const reservationProductSearch = document.getElementById('reservation-product-search');
+                        const product = products.find(p => p.id === productId);
+                        if (reservationProductSearch && product) {
+                            reservationProductSearch.value = product.name;
+                            const reservationsTab = document.querySelector('.tab[data-tab="reservations"]');
+                            if (reservationsTab) reservationsTab.click();
+                        }
                     }
                 });
                 
@@ -3323,18 +3435,26 @@
             },
             
             addReservation() {
-                const reservationProductSelect = document.getElementById('reservation-product');
+                const reservationProductSearch = document.getElementById('reservation-product-search');
                 const clientPhoneInput = document.getElementById('client-phone');
                 const reservationNotesInput = document.getElementById('reservation-notes');
                 
-                if (!reservationProductSelect || !clientPhoneInput) return;
+                if (!reservationProductSearch || !clientPhoneInput) return;
                 
-                const productId = parseInt(reservationProductSelect.value);
+                const productName = reservationProductSearch.value;
                 const phone = clientPhoneInput.value;
                 const notes = reservationNotesInput ? reservationNotesInput.value : '';
                 
-                if (!productId || !phone) {
+                if (!productName || !phone) {
                     alert('Veuillez sélectionner un produit et saisir un numéro de téléphone.');
+                    return;
+                }
+                
+                // Trouver le produit par nom
+                const product = products.find(p => p.name === productName);
+                
+                if (!product) {
+                    alert('Produit non trouvé.');
                     return;
                 }
                 
@@ -3347,13 +3467,6 @@
                     return;
                 }
                 
-                const product = products.find(p => p.id === productId);
-                
-                if (!product) {
-                    alert('Produit non trouvé.');
-                    return;
-                }
-                
                 if (product.stock <= 0) {
                     alert('Ce produit est en rupture de stock.');
                     return;
@@ -3361,7 +3474,7 @@
                 
                 // Vérifier si une réservation existe déjà pour ce produit et ce numéro
                 const existingReservation = reservations.find(r => 
-                    r.productId === productId && r.phone === cleanPhone && r.status === 'active');
+                    r.productId === product.id && r.phone === cleanPhone && r.status === 'active');
                     
                 if (existingReservation) {
                     alert('Une réservation active existe déjà pour ce produit et ce numéro de téléphone.');
@@ -3371,7 +3484,7 @@
                 // Créer la réservation
                 const reservation = {
                     id: Date.now(),
-                    productId: productId,
+                    productId: product.id,
                     productName: product.name,
                     phone: cleanPhone,
                     notes: notes,
@@ -3382,7 +3495,7 @@
                 reservations.push(reservation);
                 
                 // Réinitialiser le formulaire
-                reservationProductSelect.value = '';
+                reservationProductSearch.value = '';
                 clientPhoneInput.value = '';
                 if (reservationNotesInput) reservationNotesInput.value = '';
                 
@@ -3928,7 +4041,7 @@
                 if (filteredSales.length === 0) {
                     detailsTable.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 20px;">
+                            <td colspan="5" style="text-align: center; padding: 20px;">
                                 Aucune vente dans cette période
                             </td>
                         </tr>
@@ -3959,9 +4072,26 @@
                         <td>${this.formatPrice(displayAmount)}</td>
                         <td>${productsList}</td>
                         <td>${totalProducts}</td>
+                        <td>
+                            <button class="btn btn-danger btn-small delete-sale-report" data-id="${sale.id}">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </td>
                     `;
                     
                     detailsTable.appendChild(row);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons de suppression
+                document.querySelectorAll('.delete-sale-report').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const saleId = parseInt(this.dataset.id);
+                        app.deleteSale(saleId);
+                        // Regénérer le rapport après suppression
+                        setTimeout(() => {
+                            app.generateGlobalSalesReport();
+                        }, 100);
+                    });
                 });
             },
             
@@ -4015,11 +4145,13 @@
                             productSales[productId] = {
                                 name: item.product.name,
                                 quantity: 0,
-                                revenueEUR: 0
+                                revenueEUR: 0,
+                                sales: [] // Stocker les IDs des ventes pour pouvoir les supprimer
                             };
                         }
                         productSales[productId].quantity += item.quantity;
                         productSales[productId].revenueEUR += item.product.price * item.quantity;
+                        productSales[productId].sales.push(sale.id);
                     });
                 });
                 
@@ -4045,7 +4177,7 @@
                 if (topProducts.length === 0) {
                     topProductsTable.innerHTML = `
                         <tr>
-                            <td colspan="3" style="text-align: center; padding: 20px;">
+                            <td colspan="4" style="text-align: center; padding: 20px;">
                                 Aucune vente ce mois-ci
                             </td>
                         </tr>
@@ -4061,8 +4193,29 @@
                         <td>${product.name}</td>
                         <td>${product.quantity}</td>
                         <td>${this.formatPrice(displayRevenue)}</td>
+                        <td>
+                            <button class="btn btn-danger btn-small delete-product-sales" data-sales='${JSON.stringify(product.sales)}'>
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </td>
                     `;
                     topProductsTable.appendChild(row);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons de suppression
+                document.querySelectorAll('.delete-product-sales').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const saleIds = JSON.parse(this.dataset.sales);
+                        if (confirm(`Êtes-vous sûr de vouloir supprimer les ${saleIds.length} ventes contenant ce produit ?`)) {
+                            saleIds.forEach(saleId => {
+                                app.deleteSale(saleId);
+                            });
+                            // Regénérer le rapport après suppression
+                            setTimeout(() => {
+                                app.generateMonthlyReport();
+                            }, 100);
+                        }
+                    });
                 });
             },
             
